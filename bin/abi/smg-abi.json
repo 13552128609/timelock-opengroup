@@ -1,0 +1,300 @@
+[
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			}
+		],
+		"name": "AddAdmin",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			}
+		],
+		"name": "RemoveAdmin",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "groupId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "preGroupId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "workStart",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "workDuration",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "registerDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "StoremanGroupRegisterStartEvent",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			}
+		],
+		"name": "addAdmin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "changeOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "mapAdmin",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "newOwner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			}
+		],
+		"name": "removeAdmin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "bytes32",
+						"name": "groupId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "preGroupId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "workTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "registerDuration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "memberCountDesign",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "threshold",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "chain1",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "chain2",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "curve1",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "curve2",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakeIn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minDelegateIn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minPartIn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "delegateFee",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Smg.StoremanGroupInput",
+				"name": "smg",
+				"type": "tuple"
+			},
+			{
+				"internalType": "address[]",
+				"name": "wkAddrs",
+				"type": "address[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "senders",
+				"type": "address[]"
+			}
+		],
+		"name": "storemanGroupRegisterStart",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
