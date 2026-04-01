@@ -1,0 +1,14 @@
+{
+  "testnet": {
+   "url": "http://gwan-testnet.wandevs.org:36891",
+   "gpkContractAddr":"0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
+   "smgContractAddr":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
+   "timelockAddr":"0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C"
+  },
+  "mainnet": {
+   "url": "https://gwan-ssl.wandevs.org:56891",
+   "gpkContractAddr":"0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
+   "smgContractAddr":"0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+   "timelockAddr":""
+  }
+}
