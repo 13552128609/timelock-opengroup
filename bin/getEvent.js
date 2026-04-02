@@ -5,12 +5,14 @@ const RPC_URL = "http://gwan-testnet.wandevs.org:36891";
 
 const CONTRACT_ADDRESS = {
   "SMG":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-  "GPK":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5"
+  "GPK":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
+  "TIMELOCK":"0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
 }
 
 const ABI = {
   "SMG": require("./abi/smg-abi.json"),
   "GPK": require("./abi/gpk-abi.json"),
+  "TIMELOCK": require("./abi/timelock-abi.json"),
 }
 
 function jsonReplacer(_key, value) {
@@ -32,7 +34,7 @@ function normalizeArgs(args) {
 }
 
 function printUsageAndExit() {
-  console.log("Usage: node bin/getEvent.js <gpk|smg> <eventName>");
+  console.log("Usage: node bin/getEvent.js <gpk|smg|timelock> <eventName>");
   console.log("Example: node bin/getEvent.js smg StoremanGroupRegisterStartEvent");
   process.exit(1);
 }
@@ -100,3 +102,7 @@ async function main() {
 main().catch((error) => {
   console.error("发生错误:", error);
 });
+
+
+ //node bin/getEvent.js timelock CallExecuted
+ //node bin/getEvent.js smg StoremanGroupRegisterStartEvent
