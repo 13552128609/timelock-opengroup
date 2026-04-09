@@ -92,6 +92,42 @@ function normalizeArgs(args) {
   return out;
 }
 
+function formatArgsWithNames(event) {
+  const raw = normalizeArgs(event?.args);
+  const out = {
+    raw,
+    named: {},
+    time: {},
+  };
+
+  const inputs = event?.fragment?.inputs || [];
+  for (let i = 0; i < inputs.length; i++) {
+    const name = inputs[i]?.name || String(i);
+    const v = event.args?.[i];
+    out.named[name] = v;
+
+    const lower = String(name).toLowerCase();
+    const isTimeLike =
+      lower.includes("time") ||
+      lower.includes("timestamp") ||
+      lower.includes("delay") ||
+      lower.includes("duration");
+    if (isTimeLike && typeof v === "bigint") {
+      const n = Number(v);
+      if (Number.isFinite(n) && n >= 0) {
+        out.time[name] = {
+          seconds: v,
+          iso: new Date(n * 1000).toISOString(),
+        };
+      } else {
+        out.time[name] = { seconds: v };
+      }
+    }
+  }
+
+  return out;
+}
+
 function printUsageAndExit() {
   console.log(
     "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
@@ -165,7 +201,7 @@ async function main() {
     
     events.forEach((event) => {
       // 解析后的数据在 event.args 中
-      const args = normalizeArgs(event.args);
+      const args = formatArgsWithNames(event);
       console.log(`
         [历史事件]
         eventName: ${eventName}
