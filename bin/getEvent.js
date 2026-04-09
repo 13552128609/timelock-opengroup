@@ -1,12 +1,71 @@
 const { ethers } = require("ethers");
+const fs = require("node:fs");
+const path = require("node:path");
 
 // 1. 配置基础信息
-const RPC_URL = "http://gwan-testnet.wandevs.org:36891";
+function readRepoConfig() {
+  const configPath = path.resolve(__dirname, "..", "cfg", "config.json");
+  const raw = fs.readFileSync(configPath, "utf8");
+  return JSON.parse(raw);
+}
 
-const CONTRACT_ADDRESS = {
-  "SMG":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-  "GPK":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-  "TIMELOCK":"0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
+function parseArgs(argv) {
+  const out = {
+    network: "mainnet",
+    beforeBlock: 518400,
+    positional: [],
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--network") {
+      out.network = argv[i + 1] || "";
+      i++;
+      continue;
+    }
+    if (a === "--beforeBlock") {
+      const raw = argv[i + 1];
+      const n = Number(raw);
+      if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) {
+        out.beforeBlock = NaN;
+      } else {
+        out.beforeBlock = n;
+      }
+      i++;
+      continue;
+    }
+    out.positional.push(a);
+  }
+  return out;
+}
+
+function buildNetworkRuntime(network) {
+  const cfg = readRepoConfig();
+  const net = cfg?.[network];
+  if (!net) {
+    throw new Error(`Unknown network: ${network}. Expected testnet|mainnet`);
+  }
+  if (!net.url) {
+    throw new Error(`Missing ${network}.url in cfg/config.json`);
+  }
+  if (!net.gpkContractAddr) {
+    throw new Error(`Missing ${network}.gpkContractAddr in cfg/config.json`);
+  }
+  if (!net.smgContractAddr) {
+    throw new Error(`Missing ${network}.smgContractAddr in cfg/config.json`);
+  }
+  if (!net.timelockAddr) {
+    throw new Error(`Missing ${network}.timelockAddr in cfg/config.json`);
+  }
+
+  return {
+    rpcUrl: net.url,
+    contractAddress: {
+      SMG: net.smgContractAddr,
+      GPK: net.gpkContractAddr,
+      TIMELOCK: net.timelockAddr,
+    },
+  };
 }
 
 const ABI = {
@@ -34,26 +93,48 @@ function normalizeArgs(args) {
 }
 
 function printUsageAndExit() {
-  console.log("Usage: node bin/getEvent.js <gpk|smg|timelock> <eventName>");
-  console.log("Example: node bin/getEvent.js smg StoremanGroupRegisterStartEvent");
+  console.log(
+    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
+  );
+  console.log(
+    "Example: node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
+  );
   process.exit(1);
 }
 
 async function main() {
-  const contractArg = (process.argv[2] || "").toUpperCase();
-  const eventName = process.argv[3];
+  const { network, beforeBlock, positional } = parseArgs(process.argv.slice(2));
+  const rawContractInput = positional[0];
+  const contractArg = (positional[0] || "").toUpperCase();
+  const eventName = positional[1];
+
+  let runtime;
+  try {
+    runtime = buildNetworkRuntime(network);
+  } catch (e) {
+    console.error(String(e?.message || e));
+    printUsageAndExit();
+  }
 
   if (!contractArg || !eventName) {
     printUsageAndExit();
   }
 
+  if (!Number.isFinite(beforeBlock)) {
+    console.error("Invalid --beforeBlock. Expected a non-negative integer.");
+    printUsageAndExit();
+  }
+
+  const RPC_URL = runtime.rpcUrl;
+  const CONTRACT_ADDRESS = runtime.contractAddress;
+
   if (!CONTRACT_ADDRESS[contractArg]) {
-    console.error("Unknown contract:", process.argv[2]);
+    console.error("Unknown contract:", rawContractInput);
     printUsageAndExit();
   }
 
   if (!ABI[contractArg]) {
-    console.error("ABI not found for contract:", process.argv[2]);
+    console.error("ABI not found for contract:", rawContractInput);
     process.exit(1);
   }
 
@@ -71,12 +152,12 @@ async function main() {
 
   // --- 场景 A: 获取历史事件 ---
   async function getPastEvents() {
-    console.log("读取最近 1000 个区块内的历史事件...");
+    console.log(`读取最近 ${beforeBlock} 个区块内的历史事件...`);
     const currentBlock = await provider.getBlockNumber();
     console.log(`currentBlock: ${currentBlock}`);
     
-    // 查询从 currentBlock - 100000 到现在的事件
-    const fromBlock = Math.max(0, currentBlock - 1000);
+    // 查询从 currentBlock - beforeBlock 到现在的事件
+    const fromBlock = Math.max(0, currentBlock - beforeBlock);
     const toBlock = currentBlock;
     console.log(`fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
     const events = await contract.queryFilter(eventName, fromBlock, toBlock);
@@ -102,7 +183,7 @@ async function main() {
 main().catch((error) => {
   console.error("发生错误:", error);
 });
-
-
- //node bin/getEvent.js timelock CallExecuted
- //node bin/getEvent.js smg StoremanGroupRegisterStartEvent
+ 
+//node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent
+//node bin/getEvent.js --network testnet --beforeBlock 5000 timelock CallExecuted
+//node bin/getEvent.js smg StoremanGroupRegisterStartEvent

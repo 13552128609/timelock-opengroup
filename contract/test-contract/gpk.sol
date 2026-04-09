@@ -24,7 +24,7 @@ contract Gpk is Admin {
     function setPeriod(bytes32 groupId, uint32 ployCommitPeriod, uint32 defaultPeriod, uint32 negotiatePeriod)
         external
         onlyAdmin
-    {        
+    {     
         emit setPeriodEvent(groupId, ployCommitPeriod, defaultPeriod, negotiatePeriod);
     }
 

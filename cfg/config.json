@@ -1,14 +1,124 @@
 {
   "testnet": {
-   "url": "http://gwan-testnet.wandevs.org:36891",
-   "gpkContractAddr":"0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
-   "smgContractAddr":"0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-   "timelockAddr":"0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C"
+    "url": "http://gwan-testnet.wandevs.org:36891",
+    "gpkContractAddr": "0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
+    "smgContractAddr": "0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
+    "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
+    "storemanGroupRegisterStartDefaultParams": {
+      "wkAddrs": [
+        "0xb03A7416E0793E77169845cA81303781096E4C03",
+        "0x18DD0139AD277C6Bf91ABf88b10f165d3c37Da73",
+        "0xB8ecF18B45A489cf3DDFC0d0a7C2F5592Df19d5b",
+        "0x991Cd1992eEA30388731bD48C60ff475C62CC857",
+        "0x0Ddc7cEfb82BFDaDb4f5840D302E585Aa065912f",
+        "0x04165D679C44785D4De1BD2710DD9ff7873650fD",
+        "0x46bB0CbFd40bC45812A2A36e817227F65f74FCdE",
+        "0x63ee62316ce58a7983b6d6c19d66Cf2A976AF20C",
+        "0xd5e93C8dDE3dd954792D258393439b785b0063D2",
+        "0x476Fc6424a281aBF364BDe0B991e232eeA62F7D5",
+        "0xbD5bD3dCD156413b49d3F8504E5A3bD8eD66cbeD"
+      ],
+      "senders": [
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296"
+      ],
+      "memberCountDesign": "25",
+      "threshold": "17",
+      "chain1": "2153201998",
+      "chain2": "2147483708",
+      "curve1": "1",
+      "curve2": "0",
+      "minStakeIn": "10000000000000000000000",
+      "minDelegateIn": "100000000000000000000",
+      "minPartIn": "10000000000000000000000",
+      "delegateFee": "1000"
+    },
+    "setPeriodDefaultParams": {
+      "ployCommitPeriod": "255600",
+      "defaultPeriod": "86400",
+      "negotiatePeriod": "259200"
+    },
+    "setGpkCfgDefaultParams": {
+      "curIndex": [
+        "1",
+        "0",
+        "0"
+      ],
+      "algoIndex": [
+        "1",
+        "0",
+        "2"
+      ]
+    }
   },
   "mainnet": {
-   "url": "https://gwan-ssl.wandevs.org:56891",
-   "gpkContractAddr":"0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
-   "smgContractAddr":"0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
-   "timelockAddr":""
+    "url": "https://gwan-ssl.wandevs.org:56891",
+    "gpkContractAddr": "0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
+    "smgContractAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+    "timelockAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+    "storemanGroupRegisterStartDefaultParams": {
+      "wkAddrs": [
+        "0xb03A7416E0793E77169845cA81303781096E4C03",
+        "0x18DD0139AD277C6Bf91ABf88b10f165d3c37Da73",
+        "0xB8ecF18B45A489cf3DDFC0d0a7C2F5592Df19d5b",
+        "0x991Cd1992eEA30388731bD48C60ff475C62CC857",
+        "0x0Ddc7cEfb82BFDaDb4f5840D302E585Aa065912f",
+        "0x04165D679C44785D4De1BD2710DD9ff7873650fD",
+        "0x46bB0CbFd40bC45812A2A36e817227F65f74FCdE",
+        "0x63ee62316ce58a7983b6d6c19d66Cf2A976AF20C",
+        "0xd5e93C8dDE3dd954792D258393439b785b0063D2",
+        "0x476Fc6424a281aBF364BDe0B991e232eeA62F7D5",
+        "0xbD5bD3dCD156413b49d3F8504E5A3bD8eD66cbeD"
+      ],
+      "senders": [
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296",
+        "0x3323b4d66666e3Af2cc43751976cD62235588296"
+      ],
+      "memberCountDesign": "25",
+      "threshold": "17",
+      "chain1": "2153201998",
+      "chain2": "2147483708",
+      "curve1": "1",
+      "curve2": "0",
+      "minStakeIn": "10000000000000000000000",
+      "minDelegateIn": "100000000000000000000",
+      "minPartIn": "10000000000000000000000",
+      "delegateFee": "1000"
+    },
+    "setPeriodDefaultParams": {
+      "ployCommitPeriod": "255600",
+      "defaultPeriod": "86400",
+      "negotiatePeriod": "259200"
+    },
+    "setGpkCfgDefaultParams": {
+      "curIndex": [
+        "1",
+        "0",
+        "0"
+      ],
+      "algoIndex": [
+        "1",
+        "0",
+        "2"
+      ]
+    }
   }
 }
