@@ -18,6 +18,26 @@ export const timelockAbi = [
   },
   {
     type: "function",
+    name: "grantRole",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "role", type: "bytes32" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "revokeRole",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "role", type: "bytes32" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "getTimestamp",
     stateMutability: "view",
     inputs: [{ name: "id", type: "bytes32" }],
