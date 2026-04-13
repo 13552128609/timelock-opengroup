@@ -554,158 +554,181 @@ export default function BatchBuilderPage() {
             </Card>
 
             <Card title="storemanGroupRegisterStart struct (SMG)">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>memberCountDesign</Label>
-                  <Input value={memberCountDesign} onChange={(e) => setMemberCountDesign(e.target.value)} disabled />
+              <details>
+                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>memberCountDesign</Label>
+                    <Input value={memberCountDesign} onChange={(e) => setMemberCountDesign(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>threshold</Label>
+                    <Input value={threshold} onChange={(e) => setThreshold(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>chain1</Label>
+                    <Input value={chain1} onChange={(e) => setChain1(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>chain2</Label>
+                    <Input value={chain2} onChange={(e) => setChain2(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>curve1</Label>
+                    <Input value={curve1} onChange={(e) => setCurve1(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>curve2</Label>
+                    <Input value={curve2} onChange={(e) => setCurve2(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>minStakeIn</Label>
+                    <Input value={minStakeIn} onChange={(e) => setMinStakeIn(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>minDelegateIn</Label>
+                    <Input value={minDelegateIn} onChange={(e) => setMinDelegateIn(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>minPartIn</Label>
+                    <Input value={minPartIn} onChange={(e) => setMinPartIn(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>delegateFee</Label>
+                    <Input value={delegateFee} onChange={(e) => setDelegateFee(e.target.value)} disabled />
+                  </div>
                 </div>
-                <div>
-                  <Label>threshold</Label>
-                  <Input value={threshold} onChange={(e) => setThreshold(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>chain1</Label>
-                  <Input value={chain1} onChange={(e) => setChain1(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>chain2</Label>
-                  <Input value={chain2} onChange={(e) => setChain2(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>curve1</Label>
-                  <Input value={curve1} onChange={(e) => setCurve1(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>curve2</Label>
-                  <Input value={curve2} onChange={(e) => setCurve2(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>minStakeIn</Label>
-                  <Input value={minStakeIn} onChange={(e) => setMinStakeIn(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>minDelegateIn</Label>
-                  <Input value={minDelegateIn} onChange={(e) => setMinDelegateIn(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>minPartIn</Label>
-                  <Input value={minPartIn} onChange={(e) => setMinPartIn(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>delegateFee</Label>
-                  <Input value={delegateFee} onChange={(e) => setDelegateFee(e.target.value)} disabled />
-                </div>
-              </div>
+              </details>
             </Card>
 
             <Card title="GPK.setPeriod">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>ployCommitPeriod (uint32)</Label>
-                  <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
+              <details>
+                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>ployCommitPeriod (uint32)</Label>
+                    <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>defaultPeriod (uint32)</Label>
+                    <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>negotiatePeriod (uint32)</Label>
+                    <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} disabled />
+                  </div>
                 </div>
-                <div>
-                  <Label>defaultPeriod (uint32)</Label>
-                  <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} disabled />
-                </div>
-                <div>
-                  <Label>negotiatePeriod (uint32)</Label>
-                  <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} disabled />
-                </div>
-              </div>
+              </details>
             </Card>
 
             <Card title="GPK.setGpkCfg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>curIndex (uint256[], one per line)</Label>
-                  <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} disabled />
+              <details>
+                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>curIndex (uint256[], one per line)</Label>
+                    <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} disabled />
+                  </div>
+                  <div>
+                    <Label>algoIndex (uint256[], one per line)</Label>
+                    <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} disabled />
+                  </div>
                 </div>
-                <div>
-                  <Label>algoIndex (uint256[], one per line)</Label>
-                  <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} disabled />
-                </div>
-              </div>
+              </details>
             </Card>
 
             <Card title="Timelock params">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>predecessor (bytes32)</Label>
-                    <Input value={predecessor} onChange={(e) => setPredecessor(e.target.value)} disabled />
-                  </div>
-                  <div>
-                    <Label>salt (bytes32)</Label>
-                    <Input value={salt} onChange={(e) => setSalt(e.target.value)} disabled />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>delay (seconds)</Label>
-                  <Input value={parsed.delay.toString()} disabled />
-                </div>
+              <div>
+                <Label>delay (seconds)</Label>
+                <Input value={parsed.delay.toString()} disabled />
               </div>
+
+              <details>
+                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <div className="pt-4 grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>predecessor (bytes32)</Label>
+                      <Input value={predecessor} onChange={(e) => setPredecessor(e.target.value)} disabled />
+                    </div>
+                    <div>
+                      <Label>salt (bytes32)</Label>
+                      <Input value={salt} onChange={(e) => setSalt(e.target.value)} disabled />
+                    </div>
+                  </div>
+                </div>
+              </details>
             </Card>
 
             <Card title="Generated scheduleBatch">
-              <div className="grid grid-cols-1 gap-4">
-                {parsed.errors.length ? (
-                  <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
-                    {parsed.errors.join("\n")}
-                  </div>
-                ) : null}
+              <div className="flex items-center gap-3">
+                <Button
+                  disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
+                  onClick={async () => {
+                    if (!timelockAddr || timelockAddr === "") return;
 
-                <div>
-                  <Label>summary</Label>
-                  <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3">
-                    {JSON.stringify(parsed.summary, null, 2)}
-                  </pre>
-                </div>
+                    const targets = parsed.targets as any;
+                    const values = parsed.values as any;
+                    const payloads = parsed.payloads as any;
 
-                <div>
-                  <Label>targets</Label>
-                  <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3">
-                    {JSON.stringify(parsed.targets, null, 2)}
-                  </pre>
-                </div>
-
-                <div>
-                  <Label>values</Label>
-                  <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3">
-                    {JSON.stringify(parsed.values.map((x) => x.toString()), null, 2)}
-                  </pre>
-                </div>
-
-                <div>
-                  <Label>payloads</Label>
-                  <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3">
-                    {JSON.stringify(parsed.payloads, null, 2)}
-                  </pre>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Button
-                    disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
-                    onClick={async () => {
-                      if (!timelockAddr || timelockAddr === "") return;
-
-                      const targets = parsed.targets as any;
-                      const values = parsed.values as any;
-                      const payloads = parsed.payloads as any;
-
-                      await writeContractAsync({
-                        abi: timelockAbi,
-                        address: timelockAddr as `0x${string}`,
-                        functionName: "scheduleBatch",
-                        args: [targets, values, payloads, predecessor as any, salt as any, parsed.delay],
-                      });
-                    }}
-                  >
-                    {isPending ? "Submitting..." : "Schedule"}
-                  </Button>
-                </div>
+                    await writeContractAsync({
+                      abi: timelockAbi,
+                      address: timelockAddr as `0x${string}`,
+                      functionName: "scheduleBatch",
+                      args: [targets, values, payloads, predecessor as any, salt as any, parsed.delay],
+                    });
+                  }}
+                >
+                  {isPending ? "Submitting..." : "Schedule"}
+                </Button>
               </div>
+
+              <details>
+                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <div className="pt-4 grid grid-cols-1 gap-4">
+                  {parsed.errors.length ? (
+                    <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                      {parsed.errors.join("\n")}
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <Label>summary</Label>
+                    <Textarea
+                      value={JSON.stringify(parsed.summary, null, 2)}
+                      readOnly
+                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>targets</Label>
+                    <Textarea
+                      value={JSON.stringify(parsed.targets, null, 2)}
+                      readOnly
+                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>values</Label>
+                    <Textarea
+                      value={JSON.stringify(parsed.values.map((x) => x.toString()), null, 2)}
+                      readOnly
+                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>payloads</Label>
+                    <Textarea
+                      value={JSON.stringify(parsed.payloads, null, 2)}
+                      readOnly
+                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5 break-all"
+                    />
+                  </div>
+                </div>
+              </details>
             </Card>
           </div>
         )}
