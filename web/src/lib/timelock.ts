@@ -18,6 +18,34 @@ export const timelockAbi = [
   },
   {
     type: "function",
+    name: "getTimestamp",
+    stateMutability: "view",
+    inputs: [{ name: "id", type: "bytes32" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "isOperationDone",
+    stateMutability: "view",
+    inputs: [{ name: "id", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "isOperationPending",
+    stateMutability: "view",
+    inputs: [{ name: "id", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "isOperationReady",
+    stateMutability: "view",
+    inputs: [{ name: "id", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
     name: "schedule",
     stateMutability: "nonpayable",
     inputs: [
@@ -102,5 +130,28 @@ export const timelockAbi = [
       { name: "salt", type: "bytes32" },
     ],
     outputs: [{ name: "", type: "bytes32" }],
+  },
+  {
+    type: "event",
+    name: "CallScheduled",
+    anonymous: false,
+    inputs: [
+      { name: "id", type: "bytes32", indexed: true },
+      { name: "index", type: "uint256", indexed: true },
+      { name: "target", type: "address", indexed: false },
+      { name: "value", type: "uint256", indexed: false },
+      { name: "data", type: "bytes", indexed: false },
+      { name: "predecessor", type: "bytes32", indexed: false },
+      { name: "delay", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "CallSalt",
+    anonymous: false,
+    inputs: [
+      { name: "id", type: "bytes32", indexed: true },
+      { name: "salt", type: "bytes32", indexed: false },
+    ],
   },
 ] as const;
