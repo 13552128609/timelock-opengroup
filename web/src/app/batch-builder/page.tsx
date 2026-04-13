@@ -45,6 +45,61 @@ function toUnixSeconds(input: string): bigint {
   return BigInt(Math.floor(ms / 1000));
 }
 
+function tokenizeCommandLine(input: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let quote: "'" | '"' | null = null;
+  const s = input || "";
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (quote) {
+      if (ch === quote) {
+        quote = null;
+      } else {
+        cur += ch;
+      }
+      continue;
+    }
+
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      continue;
+    }
+
+    if (ch === " " || ch === "\n" || ch === "\t" || ch === "\r") {
+      if (cur.length) {
+        out.push(cur);
+        cur = "";
+      }
+      continue;
+    }
+
+    cur += ch;
+  }
+
+  if (cur.length) out.push(cur);
+  if (quote) throw new Error("Unclosed quote in command line");
+  return out;
+}
+
+function parseCliFlags(tokens: string[]) {
+  const args: Record<string, string> = {};
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (!t.startsWith("--")) continue;
+    const key = t.slice(2);
+    const next = tokens[i + 1];
+    if (!next || next.startsWith("--")) {
+      args[key] = "";
+    } else {
+      args[key] = next;
+      i++;
+    }
+  }
+  return args;
+}
+
 const smgAbi = [
   {
     type: "function",
@@ -117,6 +172,16 @@ export default function BatchBuilderPage() {
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
 
+  const [cmdLine, setCmdLine] = useState("");
+  const [cmdLineError, setCmdLineError] = useState<string | null>(null);
+
+  const cmdFlags = useMemo(() => {
+    if (!cmdLine || cmdLine.trim() === "") return null;
+    const tokens = tokenizeCommandLine(cmdLine);
+    if (tokens.length === 0) return null;
+    return parseCliFlags(tokens);
+  }, [cmdLine]);
+
   const [grpPrex, setGrpPrex] = useState("Aries");
   const [gid, setGid] = useState("Aries_065");
   const [pgid, setPgid] = useState("Aries_064");
@@ -126,6 +191,39 @@ export default function BatchBuilderPage() {
   const [gpkEnd, setGpkEnd] = useState("2026/04/8-03:00:00");
   const [wkStart, setWkStart] = useState("2026/04/9-04:00:00");
   const [wkEnd, setWkEnd] = useState("2026/05/9-04:00:00");
+
+  const applyCmdLine = () => {
+    try {
+      setCmdLineError(null);
+      const flags = cmdFlags;
+      if (!flags) return;
+
+      if (typeof flags.grpPrex === "string" && flags.grpPrex) setGrpPrex(flags.grpPrex);
+      if (typeof flags.gid === "string" && flags.gid) setGid(flags.gid);
+      if (typeof flags.pgid === "string" && flags.pgid) setPgid(flags.pgid);
+      if (typeof flags.regEnd === "string" && flags.regEnd) setRegEnd(flags.regEnd);
+      if (typeof flags.gpkEnd === "string" && flags.gpkEnd) setGpkEnd(flags.gpkEnd);
+      if (typeof flags.wkStart === "string" && flags.wkStart) setWkStart(flags.wkStart);
+      if (typeof flags.wkEnd === "string" && flags.wkEnd) setWkEnd(flags.wkEnd);
+    } catch (e: any) {
+      setCmdLineError(String(e?.message || e));
+    }
+  };
+
+  useEffect(() => {
+    if (!cmdLine || cmdLine.trim() === "") {
+      setCmdLineError(null);
+      return;
+    }
+
+    try {
+      setCmdLineError(null);
+      applyCmdLine();
+    } catch (e: any) {
+      setCmdLineError(String(e?.message || e));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cmdFlags]);
 
   const [memberCountDesign, setMemberCountDesign] = useState("");
   const [threshold, setThreshold] = useState("");
@@ -378,50 +476,68 @@ export default function BatchBuilderPage() {
               </div>
             ) : null}
 
+            <Card title="Command line">
+              <div className="grid grid-cols-1 gap-4">
+                {cmdLineError ? (
+                  <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                    {cmdLineError}
+                  </div>
+                ) : null}
+                <div>
+                  <Label>cmd</Label>
+                  <Textarea
+                    value={cmdLine}
+                    onChange={(e) => setCmdLine(e.target.value)}
+                    placeholder="node openGrp.js --network mainnet --grpPrex Aries --gid 'Aries_065' --pgid 'Aries_064' --regEnd '2026/04/5-04:00:00' --gpkEnd '2026/04/8-03:00:00' --wkStart '2026/04/9-04:00:00' --wkEnd '2026/05/9-04:00:00'"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button onClick={applyCmdLine}>Apply to fields</Button>
+                </div>
+              </div>
+            </Card>
+
             <Card title="Inputs">
               <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label>openGroupTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
+                  <Input value={openGroupTime} onChange={(e) => setOpenGroupTime(e.target.value)} />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label>grpPrex</Label>
-                    <Input value={grpPrex} onChange={(e) => setGrpPrex(e.target.value)} />
+                    <Input value={grpPrex} onChange={(e) => setGrpPrex(e.target.value)} disabled />
                   </div>
                   <div>
                     <Label>gid (ascii, will be bytes32)</Label>
-                    <Input value={gid} onChange={(e) => setGid(e.target.value)} />
+                    <Input value={gid} onChange={(e) => setGid(e.target.value)} disabled />
                   </div>
                   <div>
                     <Label>pgid (ascii, will be bytes32)</Label>
-                    <Input value={pgid} onChange={(e) => setPgid(e.target.value)} />
+                    <Input value={pgid} onChange={(e) => setPgid(e.target.value)} disabled />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>openGroupTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
-                    <Input value={openGroupTime} onChange={(e) => setOpenGroupTime(e.target.value)} />
-                  </div>
                   <div>
                     <Label>regEnd (YYYY/MM/DD-HH:mm:ss)</Label>
-                    <Input value={regEnd} onChange={(e) => setRegEnd(e.target.value)} />
+                    <Input value={regEnd} onChange={(e) => setRegEnd(e.target.value)} disabled />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>gpkEnd (YYYY/MM/DD-HH:mm:ss)</Label>
-                    <Input value={gpkEnd} onChange={(e) => setGpkEnd(e.target.value)} />
+                    <Input value={gpkEnd} onChange={(e) => setGpkEnd(e.target.value)} disabled />
                   </div>
-                  <div />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>wkStart (YYYY/MM/DD-HH:mm:ss)</Label>
-                    <Input value={wkStart} onChange={(e) => setWkStart(e.target.value)} />
+                    <Input value={wkStart} onChange={(e) => setWkStart(e.target.value)} disabled />
                   </div>
                   <div>
                     <Label>wkEnd (YYYY/MM/DD-HH:mm:ss)</Label>
-                    <Input value={wkEnd} onChange={(e) => setWkEnd(e.target.value)} />
+                    <Input value={wkEnd} onChange={(e) => setWkEnd(e.target.value)} disabled />
                   </div>
                 </div>
 
