@@ -427,12 +427,12 @@ export default function BatchBuilderPage() {
 
                 <div>
                   <Label>wkAddrs (one address per line, or 0x for empty)</Label>
-                  <Textarea value={wkAddrs} onChange={(e) => setWkAddrs(e.target.value)} />
+                  <Textarea value={wkAddrs} onChange={(e) => setWkAddrs(e.target.value)} disabled />
                 </div>
 
                 <div>
                   <Label>senders (one address per line, or 0x for empty)</Label>
-                  <Textarea value={senders} onChange={(e) => setSenders(e.target.value)} />
+                  <Textarea value={senders} onChange={(e) => setSenders(e.target.value)} disabled />
                 </div>
               </div>
             </Card>
@@ -441,43 +441,43 @@ export default function BatchBuilderPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>memberCountDesign</Label>
-                  <Input value={memberCountDesign} onChange={(e) => setMemberCountDesign(e.target.value)} />
+                  <Input value={memberCountDesign} onChange={(e) => setMemberCountDesign(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>threshold</Label>
-                  <Input value={threshold} onChange={(e) => setThreshold(e.target.value)} />
+                  <Input value={threshold} onChange={(e) => setThreshold(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>chain1</Label>
-                  <Input value={chain1} onChange={(e) => setChain1(e.target.value)} />
+                  <Input value={chain1} onChange={(e) => setChain1(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>chain2</Label>
-                  <Input value={chain2} onChange={(e) => setChain2(e.target.value)} />
+                  <Input value={chain2} onChange={(e) => setChain2(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>curve1</Label>
-                  <Input value={curve1} onChange={(e) => setCurve1(e.target.value)} />
+                  <Input value={curve1} onChange={(e) => setCurve1(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>curve2</Label>
-                  <Input value={curve2} onChange={(e) => setCurve2(e.target.value)} />
+                  <Input value={curve2} onChange={(e) => setCurve2(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>minStakeIn</Label>
-                  <Input value={minStakeIn} onChange={(e) => setMinStakeIn(e.target.value)} />
+                  <Input value={minStakeIn} onChange={(e) => setMinStakeIn(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>minDelegateIn</Label>
-                  <Input value={minDelegateIn} onChange={(e) => setMinDelegateIn(e.target.value)} />
+                  <Input value={minDelegateIn} onChange={(e) => setMinDelegateIn(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>minPartIn</Label>
-                  <Input value={minPartIn} onChange={(e) => setMinPartIn(e.target.value)} />
+                  <Input value={minPartIn} onChange={(e) => setMinPartIn(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>delegateFee</Label>
-                  <Input value={delegateFee} onChange={(e) => setDelegateFee(e.target.value)} />
+                  <Input value={delegateFee} onChange={(e) => setDelegateFee(e.target.value)} disabled />
                 </div>
               </div>
             </Card>
@@ -486,15 +486,15 @@ export default function BatchBuilderPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>ployCommitPeriod (uint32)</Label>
-                  <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} />
+                  <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>defaultPeriod (uint32)</Label>
-                  <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} />
+                  <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>negotiatePeriod (uint32)</Label>
-                  <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} />
+                  <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} disabled />
                 </div>
               </div>
             </Card>
@@ -503,11 +503,11 @@ export default function BatchBuilderPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>curIndex (uint256[], one per line)</Label>
-                  <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} />
+                  <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} disabled />
                 </div>
                 <div>
                   <Label>algoIndex (uint256[], one per line)</Label>
-                  <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} />
+                  <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} disabled />
                 </div>
               </div>
             </Card>
@@ -517,11 +517,11 @@ export default function BatchBuilderPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>predecessor (bytes32)</Label>
-                    <Input value={predecessor} onChange={(e) => setPredecessor(e.target.value)} />
+                    <Input value={predecessor} onChange={(e) => setPredecessor(e.target.value)} disabled />
                   </div>
                   <div>
                     <Label>salt (bytes32)</Label>
-                    <Input value={salt} onChange={(e) => setSalt(e.target.value)} />
+                    <Input value={salt} onChange={(e) => setSalt(e.target.value)} disabled />
                   </div>
                 </div>
 
