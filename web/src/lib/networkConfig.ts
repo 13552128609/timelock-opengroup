@@ -9,18 +9,22 @@ export function useActiveNetworkConfig() {
 
   const section = chainId === 888 ? "mainnet" : chainId === 999 ? "testnet" : null;
 
+  const grpPrex = process.env.NEXT_PUBLIC_GRP_PREX ?? "";
+
+  const group = section && data && grpPrex ? data[section]?.groups?.[grpPrex] : null;
+
   const rpcUrl = section && data ? data[section].url : null;
-  const smgContractAddr = section && data ? data[section].smgContractAddr : null;
-  const gpkContractAddr = section && data ? data[section].gpkContractAddr : null;
-  const timelockAddr = section && data ? data[section].timelockAddr : null;
-  const storemanGroupRegisterStartDefaultParams =
-    section && data ? data[section].storemanGroupRegisterStartDefaultParams : null;
-  const setPeriodDefaultParams = section && data ? data[section].setPeriodDefaultParams : null;
-  const setGpkCfgDefaultParams = section && data ? data[section].setGpkCfgDefaultParams : null;
+  const smgContractAddr = group ? group.smgContractAddr : null;
+  const gpkContractAddr = group ? group.gpkContractAddr : null;
+  const timelockAddr = group ? group.timelockAddr : null;
+  const storemanGroupRegisterStartDefaultParams = group ? group.storemanGroupRegisterStartDefaultParams ?? null : null;
+  const setPeriodDefaultParams = group ? group.setPeriodDefaultParams ?? null : null;
+  const setGpkCfgDefaultParams = group ? group.setGpkCfgDefaultParams ?? null : null;
 
   return {
     chainId,
     section,
+    grpPrex,
     rpcUrl,
     smgContractAddr,
     gpkContractAddr,

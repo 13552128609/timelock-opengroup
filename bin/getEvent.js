@@ -12,6 +12,7 @@ function readRepoConfig() {
 function parseArgs(argv) {
   const out = {
     network: "mainnet",
+    grpPrex: "",
     beforeBlock: 518400,
     positional: [],
   };
@@ -20,6 +21,11 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === "--network") {
       out.network = argv[i + 1] || "";
+      i++;
+      continue;
+    }
+    if (a === "--grpPrex") {
+      out.grpPrex = argv[i + 1] || "";
       i++;
       continue;
     }
@@ -39,7 +45,7 @@ function parseArgs(argv) {
   return out;
 }
 
-function buildNetworkRuntime(network) {
+function buildNetworkRuntime(network, grpPrex) {
   const cfg = readRepoConfig();
   const net = cfg?.[network];
   if (!net) {
@@ -48,22 +54,30 @@ function buildNetworkRuntime(network) {
   if (!net.url) {
     throw new Error(`Missing ${network}.url in cfg/config.json`);
   }
-  if (!net.gpkContractAddr) {
-    throw new Error(`Missing ${network}.gpkContractAddr in cfg/config.json`);
+
+  if (!grpPrex) {
+    throw new Error(`Missing --grpPrex. Expected one of cfg.${network}.groups keys`);
   }
-  if (!net.smgContractAddr) {
-    throw new Error(`Missing ${network}.smgContractAddr in cfg/config.json`);
+  const group = net?.groups?.[grpPrex];
+  if (!group) {
+    throw new Error(`Missing cfg.${network}.groups.${grpPrex} in cfg/config.json`);
   }
-  if (!net.timelockAddr) {
-    throw new Error(`Missing ${network}.timelockAddr in cfg/config.json`);
+  if (!group.gpkContractAddr) {
+    throw new Error(`Missing ${network}.groups.${grpPrex}.gpkContractAddr in cfg/config.json`);
+  }
+  if (!group.smgContractAddr) {
+    throw new Error(`Missing ${network}.groups.${grpPrex}.smgContractAddr in cfg/config.json`);
+  }
+  if (!group.timelockAddr) {
+    throw new Error(`Missing ${network}.groups.${grpPrex}.timelockAddr in cfg/config.json`);
   }
 
   return {
     rpcUrl: net.url,
     contractAddress: {
-      SMG: net.smgContractAddr,
-      GPK: net.gpkContractAddr,
-      TIMELOCK: net.timelockAddr,
+      SMG: group.smgContractAddr,
+      GPK: group.gpkContractAddr,
+      TIMELOCK: group.timelockAddr,
     },
   };
 }
@@ -130,29 +144,29 @@ function formatArgsWithNames(event) {
 
 function printUsageAndExit() {
   console.log(
-    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
+    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] --grpPrex <grpPrex> [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
   );
   console.log(
-    "Example: node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
+    "Example: node bin/getEvent.js --network testnet --grpPrex Aries --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
   );
   process.exit(1);
 }
 
 async function main() {
-  const { network, beforeBlock, positional } = parseArgs(process.argv.slice(2));
+  const { network, grpPrex, beforeBlock, positional } = parseArgs(process.argv.slice(2));
   const rawContractInput = positional[0];
   const contractArg = (positional[0] || "").toUpperCase();
   const eventName = positional[1];
 
   let runtime;
   try {
-    runtime = buildNetworkRuntime(network);
+    runtime = buildNetworkRuntime(network, grpPrex);
   } catch (e) {
     console.error(String(e?.message || e));
     printUsageAndExit();
   }
 
-  if (!contractArg || !eventName) {
+  if (!grpPrex || !contractArg || !eventName) {
     printUsageAndExit();
   }
 
