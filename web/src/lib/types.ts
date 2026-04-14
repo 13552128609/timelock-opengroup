@@ -25,9 +25,6 @@ export type SetGpkCfgDefaultParams = {
 };
 
 export type GroupConfig = {
-  gpkContractAddr: string;
-  smgContractAddr: string;
-  timelockAddr: string;
   cron?: string;
   storemanGroupRegisterStartDefaultParams?: StoremanGroupRegisterStartDefaultParams;
   setPeriodDefaultParams?: SetPeriodDefaultParams;
@@ -36,7 +33,9 @@ export type GroupConfig = {
 
 export type NetworkConfig = {
   url: string;
-  cron?: string;
+  gpkContractAddr: string;
+  smgContractAddr: string;
+  timelockAddr: string;
   groups: Record<string, GroupConfig>;
 };
 

@@ -1,12 +1,12 @@
 {
   "testnet": {
     "url": "http://gwan-testnet.wandevs.org:36891",
-    "cron": "0 4 * * *",
+    "gpkContractAddr": "0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",    
+    "smgContractAddr": "0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
+    "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
     "groups": {
       "Aries": {
-        "gpkContractAddr": "0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
-        "smgContractAddr": "0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-        "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
+        "cron": "0 4 * * *",
         "storemanGroupRegisterStartDefaultParams": {
           "wkAddrs": [
             "0xb03A7416E0793E77169845cA81303781096E4C03",
@@ -64,35 +64,31 @@
         }
       },
       "testnet": {
-        "gpkContractAddr": "0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
-        "smgContractAddr": "0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-        "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
+        "cron": "0 4 * * *",
         "storemanGroupRegisterStartDefaultParams": {
           "wkAddrs": [
-            "0xb03A7416E0793E77169845cA81303781096E4C03",
-            "0x18DD0139AD277C6Bf91ABf88b10f165d3c37Da73",
-            "0xB8ecF18B45A489cf3DDFC0d0a7C2F5592Df19d5b",
-            "0x991Cd1992eEA30388731bD48C60ff475C62CC857",
-            "0x0Ddc7cEfb82BFDaDb4f5840D302E585Aa065912f",
-            "0x04165D679C44785D4De1BD2710DD9ff7873650fD",
-            "0x46bB0CbFd40bC45812A2A36e817227F65f74FCdE",
-            "0x63ee62316ce58a7983b6d6c19d66Cf2A976AF20C",
-            "0xd5e93C8dDE3dd954792D258393439b785b0063D2",
-            "0x476Fc6424a281aBF364BDe0B991e232eeA62F7D5",
-            "0xbD5bD3dCD156413b49d3F8504E5A3bD8eD66cbeD"
+            "0x5C770cBf582D770b93cA90AdaD7E6BD33fAbC44C",
+            "0xAe254aEFCCe6a86E5715F19c78283D1e4a4512c1",
+            "0x32cBC3B2Fe7058Ab3674C52A9F5b3e65a4bd76B6",
+            "0x8382b2D2597D31694297fE92E0e82bA5A3A80c52",
+            "0xD46d4bA4b150E68B6B7729135Eb072Ce411B97d5",
+            "0x526560B05fdd54c76f2169F8EAA133c0d17Dc8DD",
+            "0xE9e1d91bb017577Fc86127964161c14706B99878",
+            "0x8b01941938E475CA1d71befecfc2b96968e783FC",
+            "0x7572E7FcE23B28e2043C3415C5F8e5AFc9114B58",
+            "0x84B1409335b8a23fDFE1D5100BE1a5d72517efd4"
           ],
           "senders": [
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296"
+            "0xc3badB2686A540564D68870E853b39bEe843F6dB",
+            "0x8AC26fBb5b5Faf3603CF404669225aBf676cc25D",
+            "0xc4b7fDb89DD3760dA2e92588D4b1ACa8670006ee",
+            "0x7F03b2b223e25Ee3D0E188046B63B2D2bD8a5d67",
+            "0x680cf5E0d08B74E9aC3Ba50EfEDa7Dc6fB749058",
+            "0x020b390D3d384E96aF90AE21ef56EbC88A15bD21",
+            "0xeA8aBaA452868b2203A847De252e050e4C207022",
+            "0x77DB2ed04dbE46215CDDBAde5C2BF71990d03cda",
+            "0x03e24e9b71f612221806402c161b800A5f3DE850",
+            "0xE14dE7B880f0Ba494dF19e2f14c3dd89E41e75Fd"
           ],
           "memberCountDesign": "25",
           "threshold": "17",
@@ -124,38 +120,34 @@
         }
       },
       "dev": {
-        "gpkContractAddr": "0x61c8BFaadebfcF9B2e532ab56075F4f4D79033eA",
-        "smgContractAddr": "0xcB67dcaA905a2DB9300f2f740202901fA3a68Aa5",
-        "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
+        "cron": "0 4 * * *",
         "storemanGroupRegisterStartDefaultParams": {
           "wkAddrs": [
-            "0xb03A7416E0793E77169845cA81303781096E4C03",
-            "0x18DD0139AD277C6Bf91ABf88b10f165d3c37Da73",
-            "0xB8ecF18B45A489cf3DDFC0d0a7C2F5592Df19d5b",
-            "0x991Cd1992eEA30388731bD48C60ff475C62CC857",
-            "0x0Ddc7cEfb82BFDaDb4f5840D302E585Aa065912f",
-            "0x04165D679C44785D4De1BD2710DD9ff7873650fD",
-            "0x46bB0CbFd40bC45812A2A36e817227F65f74FCdE",
-            "0x63ee62316ce58a7983b6d6c19d66Cf2A976AF20C",
-            "0xd5e93C8dDE3dd954792D258393439b785b0063D2",
-            "0x476Fc6424a281aBF364BDe0B991e232eeA62F7D5",
-            "0xbD5bD3dCD156413b49d3F8504E5A3bD8eD66cbeD"
+            "0x6f72Ca2ee51b765baEB744dc59734DE68134f7e9",
+            "0xa6649Cd7CA6900E837eBa85ef92fc07447Be9bb9",
+            "0xcC930c7109cf1fCa243e9C696f1Eaf357C102e62",
+            "0xb96Dd6e40bF1310966441677B25b558417487496",
+            "0xEDd710baaD4D40A3A4b9BFda46A11D8B89c6BceA",
+            "0x536E331f40e00082B94510e56cfe2dec064eD3Ff",
+            "0x0dceb6D730dbA589dA3e6cEf709a0c1FD3374f3a",
+            "0xF1dd39DE1B6F9B815e730e61786Ce9Ddc7A084bA",
+            "0x90e0117F5a8B60598B7Ee906e9b2c4f699613A0e",
+            "0x9a7d2d25A698A70210Ea0E97dd5795B1Bcf166dE"
           ],
           "senders": [
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296",
-            "0x3323b4d66666e3Af2cc43751976cD62235588296"
+            "0xd7e85C2D9669D1d2b9E81301cDa589e4745Ce0b5",
+            "0xF4c95d625Db39d26713e16299c193bea9390f8E1",
+            "0x782B811aC55d9a2085043d5a1dE927DE0e9a6A1c",
+            "0x944106dB02B25c3f0dA5fBCB62a68C266EDd6dB9",
+            "0xdba4f108C88334fACcAC0A0919112b3CFc6151b8",
+            "0x293a964e1bB8EeBBDF5Ac4884CE96f017d1304dF",
+            "0x66552D9d3ee6dCBD7e47dF11f7720592E2B0617f",
+            "0xFdC57B3c66B6ABF7C3A7c9cDb882e74302f70780",
+            "0x4F9B65b07331FD4bdCa9ccc96280f59EB47B0E93",
+            "0x6DEc72572bb7b0abE42aeb6712d1A64d25780EC7"
           ],
-          "memberCountDesign": "25",
-          "threshold": "17",
+          "memberCountDesign": "29",
+          "threshold": "21",
           "chain1": "2153201998",
           "chain2": "2147483708",
           "curve1": "1",
@@ -187,12 +179,12 @@
   },
   "mainnet": {
     "url": "https://gwan-ssl.wandevs.org:56891",
-    "cron": "0 4 * * *",
+    "gpkContractAddr": "0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
+    "smgContractAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+    "timelockAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
     "groups": {
       "Aries": {
-        "gpkContractAddr": "0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
-        "smgContractAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
-        "timelockAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+        "cron": "0 4 * * *",
         "storemanGroupRegisterStartDefaultParams": {
           "wkAddrs": [
             "0xb03A7416E0793E77169845cA81303781096E4C03",

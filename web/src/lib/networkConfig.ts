@@ -14,9 +14,9 @@ export function useActiveNetworkConfig() {
   const group = section && data && grpPrex ? data[section]?.groups?.[grpPrex] : null;
 
   const rpcUrl = section && data ? data[section].url : null;
-  const smgContractAddr = group ? group.smgContractAddr : null;
-  const gpkContractAddr = group ? group.gpkContractAddr : null;
-  const timelockAddr = group ? group.timelockAddr : null;
+  const smgContractAddr = section && data ? data[section].smgContractAddr : null;
+  const gpkContractAddr = section && data ? data[section].gpkContractAddr : null;
+  const timelockAddr = section && data ? data[section].timelockAddr : null;
   const storemanGroupRegisterStartDefaultParams = group ? group.storemanGroupRegisterStartDefaultParams ?? null : null;
   const setPeriodDefaultParams = group ? group.setPeriodDefaultParams ?? null : null;
   const setGpkCfgDefaultParams = group ? group.setGpkCfgDefaultParams ?? null : null;

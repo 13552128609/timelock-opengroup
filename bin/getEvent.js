@@ -55,29 +55,22 @@ function buildNetworkRuntime(network, grpPrex) {
     throw new Error(`Missing ${network}.url in cfg/config.json`);
   }
 
-  if (!grpPrex) {
-    throw new Error(`Missing --grpPrex. Expected one of cfg.${network}.groups keys`);
+  if (!net.gpkContractAddr) {
+    throw new Error(`Missing ${network}.gpkContractAddr in cfg/config.json`);
   }
-  const group = net?.groups?.[grpPrex];
-  if (!group) {
-    throw new Error(`Missing cfg.${network}.groups.${grpPrex} in cfg/config.json`);
+  if (!net.smgContractAddr) {
+    throw new Error(`Missing ${network}.smgContractAddr in cfg/config.json`);
   }
-  if (!group.gpkContractAddr) {
-    throw new Error(`Missing ${network}.groups.${grpPrex}.gpkContractAddr in cfg/config.json`);
-  }
-  if (!group.smgContractAddr) {
-    throw new Error(`Missing ${network}.groups.${grpPrex}.smgContractAddr in cfg/config.json`);
-  }
-  if (!group.timelockAddr) {
-    throw new Error(`Missing ${network}.groups.${grpPrex}.timelockAddr in cfg/config.json`);
-  }
+  if (!net.timelockAddr) {
+    throw new Error(`Missing ${network}.timelockAddr in cfg/config.json`);
+  }  
 
   return {
     rpcUrl: net.url,
     contractAddress: {
-      SMG: group.smgContractAddr,
-      GPK: group.gpkContractAddr,
-      TIMELOCK: group.timelockAddr,
+      SMG: net.smgContractAddr,
+      GPK: net.gpkContractAddr,
+      TIMELOCK: net.timelockAddr,
     },
   };
 }
@@ -144,10 +137,10 @@ function formatArgsWithNames(event) {
 
 function printUsageAndExit() {
   console.log(
-    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] --grpPrex <grpPrex> [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
+    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)]  [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
   );
   console.log(
-    "Example: node bin/getEvent.js --network testnet --grpPrex Aries --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
+    "Example: node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
   );
   process.exit(1);
 }
@@ -166,7 +159,7 @@ async function main() {
     printUsageAndExit();
   }
 
-  if (!grpPrex || !contractArg || !eventName) {
+  if (!contractArg || !eventName) {
     printUsageAndExit();
   }
 
@@ -233,7 +226,6 @@ async function main() {
 main().catch((error) => {
   console.error("发生错误:", error);
 });
- 
-//node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent
-//node bin/getEvent.js --network testnet --beforeBlock 5000 timelock CallExecuted
-//node bin/getEvent.js smg StoremanGroupRegisterStartEvent
+
+//node bin/getEvent.js --network testnet --beforeBlock 518400 timelock CallExecuted
+//node bin/getEvent.js --network testnet --beforeBlock 518400 smg StoremanGroupRegisterStartEvent

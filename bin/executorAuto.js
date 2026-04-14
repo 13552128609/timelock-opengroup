@@ -125,7 +125,7 @@ node bin/executorAuto.js --network testnet|mainnet --grpPrex <grpPrex> \\
 
 Notes:
 - timezone is always UTC
-- cron is resolved as: --cron > cfg[network].groups[grpPrex].cron > cfg[network].cron
+- cron is resolved as: --cron > cfg[network].groups[grpPrex].cron
 
 Examples:
 node bin/executorAuto.js --network testnet --grpPrex Aries --keystore ./keystore.json --once
@@ -148,22 +148,22 @@ function buildNetworkRuntime(network, grpPrex) {
     throw new Error(`Missing ${network}.url in cfg/config.json`);
   }
 
+  if (!net.timelockAddr) throw new Error(`Missing ${network}.timelockAddr in cfg/config.json`);
+  if (!net.smgContractAddr) throw new Error(`Missing ${network}.smgContractAddr in cfg/config.json`);
+  if (!net.gpkContractAddr) throw new Error(`Missing ${network}.gpkContractAddr in cfg/config.json`);
+
   const group = grpPrex ? net?.groups?.[grpPrex] : null;
   if (!group) {
     throw new Error(`Missing cfg.${network}.groups.${grpPrex} in cfg/config.json`);
   }
 
-  if (!group.timelockAddr) throw new Error(`Missing timelockAddr for network=${network} grpPrex=${grpPrex}`);
-  if (!group.smgContractAddr) throw new Error(`Missing smgContractAddr for network=${network} grpPrex=${grpPrex}`);
-  if (!group.gpkContractAddr) throw new Error(`Missing gpkContractAddr for network=${network} grpPrex=${grpPrex}`);
-
   return {
     rpcUrl: net.url,
-    cron: typeof group.cron === "string" && group.cron ? group.cron : typeof net.cron === "string" ? net.cron : "",
+    cron: typeof group.cron === "string" && group.cron ? group.cron : "",
     contractAddress: {
-      TIMELOCK: group.timelockAddr,
-      SMG: group.smgContractAddr,
-      GPK: group.gpkContractAddr,
+      TIMELOCK: net.timelockAddr,
+      SMG: net.smgContractAddr,
+      GPK: net.gpkContractAddr,
     },
   };
 }
@@ -440,7 +440,7 @@ async function main() {
 
   if (!finalCron) {
     console.error(
-      "Missing cron: provide --cron or set cfg[network].cron / cfg[network].groups[grpPrex].cron (or use --once)"
+      "Missing cron: provide --cron or set cfg[network].groups[grpPrex].cron (or use --once)"
     );
     printUsageAndExit();
   }
