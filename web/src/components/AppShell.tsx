@@ -5,7 +5,44 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WalletBar } from "@/components/WalletBar";
 
-function NavItem({ href, label }: { href: string; label: string }) {
+function IconSchedule({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M8 2v3M16 2v3" />
+      <path d="M3 9h18" />
+      <path d="M5 5h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+      <path d="M9 14l2 2 4-5" />
+    </svg>
+  );
+}
+
+function IconExecute({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M5 12h12" />
+      <path d="M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+function IconCancel({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
+function IconAdmin({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 1l3 6 6 .9-4.5 4.3 1.1 6.3L12 15.9 6.4 18.5l1.1-6.3L3 7.9 9 7z" />
+    </svg>
+  );
+}
+
+function NavItem({ href, label, icon }: { href: string; label: string; icon?: React.ReactNode }) {
   const pathname = usePathname();
   const active = pathname === href;
   return (
@@ -18,7 +55,10 @@ function NavItem({ href, label }: { href: string; label: string }) {
           : "text-white/70 hover:text-white hover:bg-white/5")
       }
     >
-      {label}
+      <span className="flex items-center gap-2">
+        {icon ? <span className="w-4 h-4 text-white/70">{icon}</span> : null}
+        <span>{label}</span>
+      </span>
     </Link>
   );
 }
@@ -46,10 +86,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             {rolesOpen ? (
               <div className="flex flex-col gap-1 pl-3">                
-                <NavItem href="/batch-builder" label="Schedule OpenGroup" />
-                <NavItem href="/executor" label="Execute" />
-                <NavItem href="/canceller" label="Cancel" />
-                <NavItem href="/admin" label="Admin" />
+                <NavItem href="/batch-builder" label="Schedule OpenGroup" icon={<IconSchedule className="w-4 h-4" />} />
+                <NavItem href="/executor" label="Execute" icon={<IconExecute className="w-4 h-4" />} />
+                <NavItem href="/canceller" label="Cancel" icon={<IconCancel className="w-4 h-4" />} />
+                <NavItem href="/admin" label="Admin" icon={<IconAdmin className="w-4 h-4" />} />
               </div>
             ) : null}
           </div>
