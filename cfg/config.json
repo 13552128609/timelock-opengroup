@@ -6,7 +6,7 @@
     "timelockAddr": "0xEe6A4f2B6d2cefa8638723Ce5d335a6896e4e67C",
     "groups": {
       "Aries": {
-        "cron": "0 4 * * *",
+        "cron": "49 09 * * *",
         "storemanGroupRegisterStartDefaultParams": {
           "wkAddrs": [
             "0xb03A7416E0793E77169845cA81303781096E4C03",

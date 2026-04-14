@@ -25,8 +25,6 @@ function parseArgs(argv) {
     blocksBack: 518400,
 
     keystore: "",
-    password: "",
-    passwordEnv: "KEYSTORE_PASSWORD",
 
     once: false,
     dryRun: false,
@@ -67,16 +65,6 @@ function parseArgs(argv) {
 
     if (a === "--keystore") {
       out.keystore = argv[i + 1] || "";
-      i++;
-      continue;
-    }
-    if (a === "--password") {
-      out.password = argv[i + 1] || "";
-      i++;
-      continue;
-    }
-    if (a === "--passwordEnv") {
-      out.passwordEnv = argv[i + 1] || "KEYSTORE_PASSWORD";
       i++;
       continue;
     }
@@ -351,19 +339,20 @@ async function executeOneOperation({ timelock, op, dryRun, gasLimit }) {
 }
 
 async function runOnce(args) {
+  const ctx = await initRuntimeContext(args);
+  await runOnceWithContext(args, ctx);
+
+  if (ctx?.provider?.destroy) {
+    ctx.provider.destroy();
+  }
+}
+
+async function initRuntimeContext(args) {
   const runtime = buildNetworkRuntime(args.network, args.grpPrex);
-
   const provider = new ethers.JsonRpcProvider(runtime.rpcUrl);
-  const password =
-    args.password ||
-    process.env[args.passwordEnv] ||
-    (await askHidden(`Keystore password (env ${args.passwordEnv} not set): `));
 
-  const wallet = await loadWalletFromKeystore({
-    keystorePath: args.keystore,
-    password,
-  });
-
+  const password = await askHidden("Keystore password: ");
+  const wallet = await loadWalletFromKeystore({ keystorePath: args.keystore, password });
   const signer = wallet.connect(provider);
 
   const timelockAddr = runtime.contractAddress.TIMELOCK;
@@ -374,6 +363,19 @@ async function runOnce(args) {
   console.log(`[${nowIso()}] executor=${await signer.getAddress()}`);
 
   await assertExecutorRole({ timelock, walletAddress: await signer.getAddress() });
+
+  return {
+    runtime,
+    provider,
+    wallet,
+    signer,
+    timelock,
+  };
+}
+
+async function runOnceWithContext(args, ctx) {
+  const provider = ctx.provider;
+  const timelock = ctx.timelock;
 
   const { fromBlock, toBlock, ops } = await scanReadyOperations({
     provider,
@@ -413,6 +415,10 @@ async function runOnce(args) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
+  if (process.argv.includes("--password") || process.argv.includes("--passwordEnv")) {
+    throw new Error("Keystore password must be entered interactively; --password/--passwordEnv are not supported");
+  }
+
   if (!args.network || !args.grpPrex) {
     console.error("Missing required args: --network and --grpPrex");
     printUsageAndExit();
@@ -430,13 +436,18 @@ async function main() {
     printUsageAndExit();
   }
 
+  const ctx = await initRuntimeContext(args);
+
   if (args.once) {
-    await runOnce(args);
+    await runOnceWithContext(args, ctx);
+
+    if (ctx?.provider?.destroy) {
+      ctx.provider.destroy();
+    }
     return;
   }
 
-  const runtime = buildNetworkRuntime(args.network, args.grpPrex);
-  const finalCron = args.cron || runtime.cron;
+  const finalCron = args.cron || ctx.runtime.cron;
 
   if (!finalCron) {
     console.error(
@@ -455,7 +466,7 @@ async function main() {
     async () => {
       console.log(`[${nowIso()}] cron fired`);
       try {
-        await runOnce(args);
+        await runOnceWithContext(args, ctx);
       } catch (e) {
         console.error(`[${nowIso()}] runOnce error:`, String(e?.stack || e?.message || e));
       }
