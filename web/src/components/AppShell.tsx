@@ -45,11 +45,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             {rolesOpen ? (
-              <div className="flex flex-col gap-1 pl-3">
-                <NavItem href="/admin" label="Admin" />
+              <div className="flex flex-col gap-1 pl-3">                
                 <NavItem href="/batch-builder" label="Schedule OpenGroup" />
                 <NavItem href="/executor" label="Execute" />
                 <NavItem href="/canceller" label="Cancel" />
+                <NavItem href="/admin" label="Admin" />
               </div>
             ) : null}
           </div>

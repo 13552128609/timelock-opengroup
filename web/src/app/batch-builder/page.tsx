@@ -552,13 +552,20 @@ export default function BatchBuilderPage() {
 
             <Card title="Inputs">
               <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <Label>openGroupTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
-                  <Input
-                    value={openGroupTime}
-                    onChange={(e) => setOpenGroupTime(e.target.value)}
-                    onBlur={() => setOpenGroupTime((v) => normalizeDateTimeString(v))}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>openGroupTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
+                    <Input
+                      value={openGroupTime}
+                      onChange={(e) => setOpenGroupTime(e.target.value)}
+                      onBlur={() => setOpenGroupTime((v) => normalizeDateTimeString(v))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>delay (seconds)</Label>
+                    <Input value={parsed.delay.toString()} disabled />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -697,11 +704,6 @@ export default function BatchBuilderPage() {
             </div>
 
             <Card title="Timelock params">
-              <div>
-                <Label>delay (seconds)</Label>
-                <Input value={parsed.delay.toString()} disabled />
-              </div>
-
               <details>
                 <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
                 <div className="pt-4 grid grid-cols-1 gap-4">
