@@ -303,7 +303,7 @@ export default function CancellerPage() {
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>blocksBack</Label>
+                    <Label>blocksBack (Abount 30days)</Label>
                     <Input value={blocksBack} onChange={(e) => setBlocksBack(e.target.value)} />
                   </div>
                   <div className="flex items-end gap-3">
