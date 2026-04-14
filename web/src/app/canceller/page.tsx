@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/Card";
 import { Button, Input, Label } from "@/components/Form";
 import { RoleGate } from "@/components/RoleGate";
+import { useTxFeedback } from "@/components/TxFeedbackProvider";
 import { useActiveNetworkConfig } from "@/lib/networkConfig";
 import { CANCELLER_ROLE, timelockAbi } from "@/lib/timelock";
 
@@ -101,6 +102,7 @@ export default function CancellerPage() {
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const publicClient = usePublicClient();
+  const { sendTx } = useTxFeedback();
 
   const defaultBlocksBack = useMemo(() => {
     // 86400 seconds/day, 5 sec/block, 30 days
@@ -252,7 +254,15 @@ export default function CancellerPage() {
         })
       );
 
-      const filtered = rows
+      const uniqMap = new Map<string, (typeof rows)[number]>();
+      for (const r of rows) {
+        const k = `${r.id.toLowerCase()}-${r.index.toString()}`;
+        const prev = uniqMap.get(k);
+        if (!prev || r.blockNumber > prev.blockNumber) uniqMap.set(k, r);
+      }
+      const uniqRows = Array.from(uniqMap.values());
+
+      const filtered = uniqRows
         .filter((x) => !x.done)
         .filter((x) => x.timestamp !== null && x.timestamp > BigInt(1))
         .sort((a, b) => {
@@ -333,12 +343,20 @@ export default function CancellerPage() {
                               disabled={!allowed || !isConnected || !timelockAddr || timelockAddr === "" || isPending}
                               onClick={async () => {
                                 if (!timelockAddr || timelockAddr === "") return;
-                                await writeContractAsync({
-                                  abi: timelockAbi,
-                                  address: timelockAddr as `0x${string}`,
-                                  functionName: "cancel",
-                                  args: [op.id as any],
-                                });
+                                const res = await sendTx(
+                                  () =>
+                                    writeContractAsync({
+                                      abi: timelockAbi,
+                                      address: timelockAddr as `0x${string}`,
+                                      functionName: "cancel",
+                                      args: [op.id as any],
+                                    }),
+                                  "Cancel operation"
+                                );
+
+                                if (res.status === "success") {
+                                  setOps((prev) => prev.filter((x) => x.id.toLowerCase() !== op.id.toLowerCase()));
+                                }
                               }}
                             >
                               {isPending ? "Submitting..." : "Cancel"}

@@ -6,6 +6,7 @@ import { injected } from "@wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RepoConfig } from "@/lib/types";
 import { wanchainMainnet, wanchainTestnet } from "@/lib/wanchain";
+import { TxFeedbackProvider } from "@/components/TxFeedbackProvider";
 
 const queryClient = new QueryClient();
 
@@ -60,7 +61,9 @@ export function Providers({ children }: Props) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <TxFeedbackProvider>{children}</TxFeedbackProvider>
+      </WagmiProvider>
     </QueryClientProvider>
   );
 }

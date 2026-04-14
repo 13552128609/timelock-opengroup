@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { encodeFunctionData, pad, stringToHex } from "viem";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/Card";
 import { Button, Input, Label, Textarea } from "@/components/Form";
 import { RoleGate } from "@/components/RoleGate";
+import { useTxFeedback } from "@/components/TxFeedbackProvider";
 import { useActiveNetworkConfig } from "@/lib/networkConfig";
 import { parseLines } from "@/lib/parse";
 import { PROPOSER_ROLE, timelockAbi } from "@/lib/timelock";
@@ -43,6 +44,23 @@ function toUnixSeconds(input: string): bigint {
   }
   if (!Number.isFinite(ms)) throw new Error(`Invalid datetime: ${input}`);
   return BigInt(Math.floor(ms / 1000));
+}
+
+function normalizeDateTimeString(input: string): string {
+  const s = (input || "").trim();
+  if (!s) return s;
+
+  const m = s.match(/^\s*(\d{4})\/(\d{1,2})\/(\d{1,2})([-\s])(\d{1,2}):(\d{1,2}):(\d{1,2})\s*$/);
+  if (!m) return s;
+
+  const y = m[1];
+  const mo = String(m[2]).padStart(2, "0");
+  const d = String(m[3]).padStart(2, "0");
+  const sep = m[4] === " " ? "-" : m[4];
+  const hh = String(m[5]).padStart(2, "0");
+  const mm = String(m[6]).padStart(2, "0");
+  const ss = String(m[7]).padStart(2, "0");
+  return `${y}/${mo}/${d}${sep}${hh}:${mm}:${ss}`;
 }
 
 function tokenizeCommandLine(input: string): string[] {
@@ -160,6 +178,15 @@ const gpkAbi = [
   },
 ] as const;
 
+const DEFAULT_GRP_PREX = "Aries";
+const DEFAULT_GID = "Aries_065";
+const DEFAULT_PGID = "Aries_064";
+const DEFAULT_OPEN_GROUP_TIME = "2026/04/01-04:00:00";
+const DEFAULT_REG_END = "2026/04/05-04:00:00";
+const DEFAULT_GPK_END = "2026/04/08-03:00:00";
+const DEFAULT_WK_START = "2026/04/09-04:00:00";
+const DEFAULT_WK_END = "2026/05/09-04:00:00";
+
 export default function BatchBuilderPage() {
   const {
     timelockAddr,
@@ -171,8 +198,11 @@ export default function BatchBuilderPage() {
   } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
+  const { sendTx } = useTxFeedback();
 
-  const [cmdLine, setCmdLine] = useState("");
+  const [cmdLine, setCmdLine] = useState(
+    `node openGrp.js --network mainnet --grpPrex ${DEFAULT_GRP_PREX} --gid '${DEFAULT_GID}' --pgid '${DEFAULT_PGID}' --regEnd '${DEFAULT_REG_END}' --gpkEnd '${DEFAULT_GPK_END}' --wkStart '${DEFAULT_WK_START}' --wkEnd '${DEFAULT_WK_END}' --wlStart 0 --wlCount 11`
+  );
   const [cmdLineError, setCmdLineError] = useState<string | null>(null);
 
   const cmdFlags = useMemo(() => {
@@ -182,15 +212,15 @@ export default function BatchBuilderPage() {
     return parseCliFlags(tokens);
   }, [cmdLine]);
 
-  const [grpPrex, setGrpPrex] = useState("Aries");
-  const [gid, setGid] = useState("Aries_065");
-  const [pgid, setPgid] = useState("Aries_064");
+  const [grpPrex, setGrpPrex] = useState(DEFAULT_GRP_PREX);
+  const [gid, setGid] = useState(DEFAULT_GID);
+  const [pgid, setPgid] = useState(DEFAULT_PGID);
 
-  const [regEnd, setRegEnd] = useState("2026/04/5-04:00:00");
-  const [openGroupTime, setOpenGroupTime] = useState("2026/04/4-04:00:00");
-  const [gpkEnd, setGpkEnd] = useState("2026/04/8-03:00:00");
-  const [wkStart, setWkStart] = useState("2026/04/9-04:00:00");
-  const [wkEnd, setWkEnd] = useState("2026/05/9-04:00:00");
+  const [regEnd, setRegEnd] = useState(DEFAULT_REG_END);
+  const [openGroupTime, setOpenGroupTime] = useState(DEFAULT_OPEN_GROUP_TIME);
+  const [gpkEnd, setGpkEnd] = useState(DEFAULT_GPK_END);
+  const [wkStart, setWkStart] = useState(DEFAULT_WK_START);
+  const [wkEnd, setWkEnd] = useState(DEFAULT_WK_END);
 
   const applyCmdLine = () => {
     try {
@@ -201,10 +231,10 @@ export default function BatchBuilderPage() {
       if (typeof flags.grpPrex === "string" && flags.grpPrex) setGrpPrex(flags.grpPrex);
       if (typeof flags.gid === "string" && flags.gid) setGid(flags.gid);
       if (typeof flags.pgid === "string" && flags.pgid) setPgid(flags.pgid);
-      if (typeof flags.regEnd === "string" && flags.regEnd) setRegEnd(flags.regEnd);
-      if (typeof flags.gpkEnd === "string" && flags.gpkEnd) setGpkEnd(flags.gpkEnd);
-      if (typeof flags.wkStart === "string" && flags.wkStart) setWkStart(flags.wkStart);
-      if (typeof flags.wkEnd === "string" && flags.wkEnd) setWkEnd(flags.wkEnd);
+      if (typeof flags.regEnd === "string" && flags.regEnd) setRegEnd(normalizeDateTimeString(flags.regEnd));
+      if (typeof flags.gpkEnd === "string" && flags.gpkEnd) setGpkEnd(normalizeDateTimeString(flags.gpkEnd));
+      if (typeof flags.wkStart === "string" && flags.wkStart) setWkStart(normalizeDateTimeString(flags.wkStart));
+      if (typeof flags.wkEnd === "string" && flags.wkEnd) setWkEnd(normalizeDateTimeString(flags.wkEnd));
     } catch (e: any) {
       setCmdLineError(String(e?.message || e));
     }
@@ -462,7 +492,7 @@ export default function BatchBuilderPage() {
     <AppShell>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="text-xl font-semibold">BATCH BUILDER</div>
+          <div className="text-xl font-semibold">Schedule Open Storeman Group</div>
           <div className="text-sm text-white/60 mt-1">Build scheduleBatch payloads for SMG + GPK</div>
         </div>
       </div>
@@ -491,8 +521,31 @@ export default function BatchBuilderPage() {
                     placeholder="node openGrp.js --network mainnet --grpPrex Aries --gid 'Aries_065' --pgid 'Aries_064' --regEnd '2026/04/5-04:00:00' --gpkEnd '2026/04/8-03:00:00' --wkStart '2026/04/9-04:00:00' --wkEnd '2026/05/9-04:00:00'"
                   />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-3">
                   <Button onClick={applyCmdLine}>Apply to fields</Button>
+                  <Button
+                    disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
+                    onClick={async () => {
+                      if (!timelockAddr || timelockAddr === "") return;
+
+                      const targets = parsed.targets as any;
+                      const values = parsed.values as any;
+                      const payloads = parsed.payloads as any;
+
+                      await sendTx(
+                        () =>
+                          writeContractAsync({
+                            abi: timelockAbi,
+                            address: timelockAddr as `0x${string}`,
+                            functionName: "scheduleBatch",
+                            args: [targets, values, payloads, predecessor as any, salt as any, parsed.delay],
+                          }),
+                        "Schedule batch"
+                      );
+                    }}
+                  >
+                    {isPending ? "Submitting..." : "Schedule"}
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -501,7 +554,11 @@ export default function BatchBuilderPage() {
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label>openGroupTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
-                  <Input value={openGroupTime} onChange={(e) => setOpenGroupTime(e.target.value)} />
+                  <Input
+                    value={openGroupTime}
+                    onChange={(e) => setOpenGroupTime(e.target.value)}
+                    onBlur={() => setOpenGroupTime((v) => normalizeDateTimeString(v))}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -601,41 +658,43 @@ export default function BatchBuilderPage() {
               </details>
             </Card>
 
-            <Card title="GPK.setPeriod">
-              <details>
-                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
-                <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label>ployCommitPeriod (uint32)</Label>
-                    <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card title="GPK.setPeriod">
+                <details>
+                  <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                  <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>ployCommitPeriod (uint32)</Label>
+                      <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
+                    </div>
+                    <div>
+                      <Label>defaultPeriod (uint32)</Label>
+                      <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} disabled />
+                    </div>
+                    <div>
+                      <Label>negotiatePeriod (uint32)</Label>
+                      <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} disabled />
+                    </div>
                   </div>
-                  <div>
-                    <Label>defaultPeriod (uint32)</Label>
-                    <Input value={defaultPeriod} onChange={(e) => setDefaultPeriod(e.target.value)} disabled />
-                  </div>
-                  <div>
-                    <Label>negotiatePeriod (uint32)</Label>
-                    <Input value={negotiatePeriod} onChange={(e) => setNegotiatePeriod(e.target.value)} disabled />
-                  </div>
-                </div>
-              </details>
-            </Card>
+                </details>
+              </Card>
 
-            <Card title="GPK.setGpkCfg">
-              <details>
-                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
-                <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>curIndex (uint256[], one per line)</Label>
-                    <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} disabled />
+              <Card title="GPK.setGpkCfg">
+                <details>
+                  <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                  <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>curIndex (uint256[], one per line)</Label>
+                      <Textarea value={curIndex} onChange={(e) => setCurIndex(e.target.value)} disabled />
+                    </div>
+                    <div>
+                      <Label>algoIndex (uint256[], one per line)</Label>
+                      <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} disabled />
+                    </div>
                   </div>
-                  <div>
-                    <Label>algoIndex (uint256[], one per line)</Label>
-                    <Textarea value={algoIndex} onChange={(e) => setAlgoIndex(e.target.value)} disabled />
-                  </div>
-                </div>
-              </details>
-            </Card>
+                </details>
+              </Card>
+            </div>
 
             <Card title="Timelock params">
               <div>
@@ -661,28 +720,6 @@ export default function BatchBuilderPage() {
             </Card>
 
             <Card title="Generated scheduleBatch">
-              <div className="flex items-center gap-3">
-                <Button
-                  disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
-                  onClick={async () => {
-                    if (!timelockAddr || timelockAddr === "") return;
-
-                    const targets = parsed.targets as any;
-                    const values = parsed.values as any;
-                    const payloads = parsed.payloads as any;
-
-                    await writeContractAsync({
-                      abi: timelockAbi,
-                      address: timelockAddr as `0x${string}`,
-                      functionName: "scheduleBatch",
-                      args: [targets, values, payloads, predecessor as any, salt as any, parsed.delay],
-                    });
-                  }}
-                >
-                  {isPending ? "Submitting..." : "Schedule"}
-                </Button>
-              </div>
-
               <details>
                 <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
                 <div className="pt-4 grid grid-cols-1 gap-4">

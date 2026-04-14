@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/Card";
 import { Button, Input, Label } from "@/components/Form";
 import { RoleGate } from "@/components/RoleGate";
+import { useTxFeedback } from "@/components/TxFeedbackProvider";
 import { useActiveNetworkConfig } from "@/lib/networkConfig";
 import { EXECUTOR_ROLE, timelockAbi } from "@/lib/timelock";
 
@@ -134,6 +135,7 @@ export default function ExecutorPage() {
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const publicClient = usePublicClient();
+  const { sendTx } = useTxFeedback();
 
   const defaultBlocksBack = useMemo(() => {
     return Math.floor((86400 / 5) * 30);
@@ -292,7 +294,17 @@ export default function ExecutorPage() {
         .map((g) => {
           const st = statusById.get(g.id.toLowerCase()) ?? { done: false, pending: false, ready: false, ts: null };
           const salt = saltById.get(g.id.toLowerCase()) ?? (("0x" + "0".repeat(64)) as `0x${string}`);
-          const calls = [...g.calls].sort((a, b) => (a.index === b.index ? 0 : a.index < b.index ? -1 : 1));
+
+          const uniqCallsByIndex = new Map<string, (typeof g.calls)[number]>();
+          for (const c of g.calls) {
+            const k = c.index.toString();
+            const prev = uniqCallsByIndex.get(k);
+            if (!prev || c.blockNumber > prev.blockNumber) uniqCallsByIndex.set(k, c);
+          }
+          const calls = Array.from(uniqCallsByIndex.values()).sort((a, b) =>
+            a.index === b.index ? 0 : a.index < b.index ? -1 : 1
+          );
+
           return {
             id: g.id,
             predecessor: g.predecessor,
@@ -389,22 +401,38 @@ export default function ExecutorPage() {
                                 if (op.calls.length <= 1) {
                                   const c = op.calls[0];
                                   if (!c) return;
-                                  await writeContractAsync({
-                                    abi: timelockAbi,
-                                    address: timelockAddr as `0x${string}`,
-                                    functionName: "execute",
-                                    args: [c.target as any, c.value as any, c.data as any, predecessor as any, salt as any],
-                                  });
+                                  const res = await sendTx(
+                                    () =>
+                                      writeContractAsync({
+                                        abi: timelockAbi,
+                                        address: timelockAddr as `0x${string}`,
+                                        functionName: "execute",
+                                        args: [c.target as any, c.value as any, c.data as any, predecessor as any, salt as any],
+                                      }),
+                                    "Execute operation"
+                                  );
+
+                                  if (res.status === "success") {
+                                    setOps((prev) => prev.filter((x) => x.id.toLowerCase() !== op.id.toLowerCase()));
+                                  }
                                 } else {
                                   const targets = op.calls.map((c) => c.target);
                                   const values = op.calls.map((c) => c.value);
                                   const payloads = op.calls.map((c) => c.data);
-                                  await writeContractAsync({
-                                    abi: timelockAbi,
-                                    address: timelockAddr as `0x${string}`,
-                                    functionName: "executeBatch",
-                                    args: [targets as any, values as any, payloads as any, predecessor as any, salt as any],
-                                  });
+                                  const res = await sendTx(
+                                    () =>
+                                      writeContractAsync({
+                                        abi: timelockAbi,
+                                        address: timelockAddr as `0x${string}`,
+                                        functionName: "executeBatch",
+                                        args: [targets as any, values as any, payloads as any, predecessor as any, salt as any],
+                                      }),
+                                    "Execute batch"
+                                  );
+
+                                  if (res.status === "success") {
+                                    setOps((prev) => prev.filter((x) => x.id.toLowerCase() !== op.id.toLowerCase()));
+                                  }
                                 }
                               }}
                             >

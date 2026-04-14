@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/Card";
 import { Button, Input, Label, Textarea } from "@/components/Form";
 import { RoleGate } from "@/components/RoleGate";
+import { useTxFeedback } from "@/components/TxFeedbackProvider";
 import { useActiveNetworkConfig } from "@/lib/networkConfig";
 import { parseLines } from "@/lib/parse";
 import {
@@ -20,6 +21,7 @@ export default function AdminPage() {
   const { timelockAddr } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
+  const { sendTx } = useTxFeedback();
 
   const [batchAddrs, setBatchAddrs] = useState("0x");
   const [lookupAddr, setLookupAddr] = useState("0x");
@@ -112,12 +114,16 @@ export default function AdminPage() {
                     onClick={async () => {
                       if (!timelockAddr || timelockAddr === "") return;
                       for (const a of addresses) {
-                        await writeContractAsync({
-                          abi: timelockAbi,
-                          address: timelockAddr as `0x${string}`,
-                          functionName: "grantRole",
-                          args: [PROPOSER_ROLE, a as any],
-                        });
+                        await sendTx(
+                          () =>
+                            writeContractAsync({
+                              abi: timelockAbi,
+                              address: timelockAddr as `0x${string}`,
+                              functionName: "grantRole",
+                              args: [PROPOSER_ROLE, a as any],
+                            }),
+                          "Grant PROPOSER role"
+                        );
                       }
                     }}
                   >
@@ -129,12 +135,16 @@ export default function AdminPage() {
                     onClick={async () => {
                       if (!timelockAddr || timelockAddr === "") return;
                       for (const a of addresses) {
-                        await writeContractAsync({
-                          abi: timelockAbi,
-                          address: timelockAddr as `0x${string}`,
-                          functionName: "grantRole",
-                          args: [EXECUTOR_ROLE, a as any],
-                        });
+                        await sendTx(
+                          () =>
+                            writeContractAsync({
+                              abi: timelockAbi,
+                              address: timelockAddr as `0x${string}`,
+                              functionName: "grantRole",
+                              args: [EXECUTOR_ROLE, a as any],
+                            }),
+                          "Grant EXECUTOR role"
+                        );
                       }
                     }}
                   >
@@ -146,12 +156,16 @@ export default function AdminPage() {
                     onClick={async () => {
                       if (!timelockAddr || timelockAddr === "") return;
                       for (const a of addresses) {
-                        await writeContractAsync({
-                          abi: timelockAbi,
-                          address: timelockAddr as `0x${string}`,
-                          functionName: "grantRole",
-                          args: [CANCELLER_ROLE, a as any],
-                        });
+                        await sendTx(
+                          () =>
+                            writeContractAsync({
+                              abi: timelockAbi,
+                              address: timelockAddr as `0x${string}`,
+                              functionName: "grantRole",
+                              args: [CANCELLER_ROLE, a as any],
+                            }),
+                          "Grant CANCELLER role"
+                        );
                       }
                     }}
                   >
