@@ -664,7 +664,7 @@ export default function BatchBuilderPage() {
                   <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
                   <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label>ployCommitPeriod (uint32)</Label>
+                      <Label>CommitPeriod (uint32)</Label>
                       <Input value={ployCommitPeriod} onChange={(e) => setPloyCommitPeriod(e.target.value)} disabled />
                     </div>
                     <div>
