@@ -9,6 +9,8 @@ import {
   useChainId,
 } from "wagmi";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 function shortAddress(addr?: string) {
   if (!addr) return "";
   return addr.slice(0, 6) + "..." + addr.slice(-4);
@@ -32,7 +34,8 @@ export function WalletBar() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="hidden sm:flex items-center gap-2 text-xs text-white/60">
+      <div className="hidden sm:flex items-center gap-2 text-xs text-[var(--muted)]">
+        <ThemeToggle />
         <span>chainId:</span>
         <span className={isSupportedChain ? "text-emerald-300" : "text-amber-300"}>{chainId}</span>
       </div>
@@ -42,14 +45,14 @@ export function WalletBar() {
           {!isSupportedChain ? (
             <div className="flex items-center gap-2">
               <button
-                className="h-9 px-3 rounded-md bg-white/10 hover:bg-white/15 text-sm"
+                className="h-9 px-3 rounded-md bg-[var(--panel)] hover:bg-[var(--panel-2)] text-sm"
                 onClick={() => switchChain({ chainId: 999 })}
                 disabled={switching}
               >
                 Switch to 999
               </button>
               <button
-                className="h-9 px-3 rounded-md bg-white/10 hover:bg-white/15 text-sm"
+                className="h-9 px-3 rounded-md bg-[var(--panel)] hover:bg-[var(--panel-2)] text-sm"
                 onClick={() => switchChain({ chainId: 888 })}
                 disabled={switching}
               >
@@ -58,11 +61,11 @@ export function WalletBar() {
             </div>
           ) : null}
 
-          <div className="h-9 px-3 rounded-md bg-white/5 border border-white/10 flex items-center text-sm">
+          <div className="h-9 px-3 rounded-md bg-[var(--panel)] border border-[var(--border)] flex items-center text-sm">
             {shortAddress(address)}
           </div>
           <button
-            className="h-9 px-3 rounded-md bg-white text-black text-sm hover:bg-white/90"
+            className="h-9 px-3 rounded-md bg-[var(--foreground)] text-[var(--background)] text-sm hover:opacity-90"
             onClick={() => disconnect()}
           >
             Disconnect
@@ -70,7 +73,7 @@ export function WalletBar() {
         </>
       ) : (
         <button
-          className="h-9 px-3 rounded-md bg-white text-black text-sm hover:bg-white/90"
+          className="h-9 px-3 rounded-md bg-[var(--foreground)] text-[var(--background)] text-sm hover:opacity-90"
           onClick={onConnect}
           disabled={isPending}
         >

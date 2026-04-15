@@ -287,14 +287,14 @@ export default function CancellerPage() {
     <AppShell>
       <div className="mb-6">
         <div className="text-xl font-semibold">CANCELLER</div>
-        <div className="text-sm text-white/60 mt-1">Cancel a scheduled operation by id</div>
+        <div className="text-sm text-[var(--muted)] mt-1">Cancel a scheduled operation by id</div>
       </div>
 
       <RoleGate role={CANCELLER_ROLE}>
         {({ allowed, reason }) => (
           <div className="space-y-6">
             {!allowed ? (
-              <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing CANCELLER role"}
               </div>
             ) : null}
@@ -316,7 +316,7 @@ export default function CancellerPage() {
                   </div>
                 </div>
 
-                <div className="text-xs text-white/60">
+                <div className="text-xs text-[var(--muted)]">
                   fromBlock: {fromBlock?.toString() ?? "-"} toBlock: {toBlock?.toString() ?? "-"}
                 </div>
 
@@ -326,16 +326,16 @@ export default function CancellerPage() {
                   </div>
                 ) : null}
 
-                <div className="text-sm text-white/70">
-                  Showing operations that are <span className="text-white">not done</span>.
+                <div className="text-sm text-[var(--muted)]">
+                  Showing operations that are <span className="text-[var(--foreground)]">not done</span>.
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
                   {ops.length === 0 ? (
-                    <div className="text-sm text-white/60">No cancellable CallScheduled events in this range.</div>
+                    <div className="text-sm text-[var(--muted)]">No cancellable CallScheduled events in this range.</div>
                   ) : (
                     ops.map((op) => (
-                      <div key={`${op.id}-${op.index.toString()}`} className="rounded-lg border border-white/10 bg-black/20 p-4">
+                      <div key={`${op.id}-${op.index.toString()}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                         <div className="grid grid-cols-1 gap-2">
                           <div className="flex items-center justify-between gap-3">
                             <div className="font-mono text-xs break-all">id: {op.id}</div>
@@ -363,7 +363,7 @@ export default function CancellerPage() {
                             </Button>
                           </div>
 
-                          <div className="text-xs text-white/70 grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="text-xs text-[var(--muted)] grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div className="font-mono break-all">target: {op.target}</div>
                             <div>value: {op.value === BigInt(0) ? "0" : formatUnits(op.value, 18)}</div>
                             <div>delay: {op.delay.toString()} sec</div>
@@ -376,7 +376,7 @@ export default function CancellerPage() {
 
                           <div className="text-xs">
                             <div className="font-semibold mb-1">decoded</div>
-                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3">
+                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3">
                               {op.decoded
                                 ? op.decoded.kind === "decoded"
                                   ? JSON.stringify(
@@ -394,7 +394,7 @@ export default function CancellerPage() {
 
                           <div className="text-xs">
                             <div className="font-semibold mb-1">raw calldata</div>
-                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-white/10 bg-black/20 p-3 break-all">
+                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3 break-all">
                               {op.data}
                             </pre>
                           </div>

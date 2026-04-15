@@ -3,6 +3,45 @@
 :root {
   --background: #0b0f1a;
   --foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.70);
+  --muted-2: rgba(255, 255, 255, 0.55);
+  --border: rgba(255, 255, 255, 0.12);
+  --panel: rgba(255, 255, 255, 0.04);
+  --panel-2: rgba(255, 255, 255, 0.07);
+  --warning-border: rgba(251, 191, 36, 0.35);
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --warning-text: #fcd34d;
+  --success-text: #6ee7b7;
+  --error-text: #fca5a5;
+  --error-border: rgba(248, 113, 113, 0.35);
+  --error-bg: rgba(248, 113, 113, 0.12);
+}
+
+html[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #0b0f1a;
+  --muted: rgba(11, 15, 26, 0.72);
+  --muted-2: rgba(11, 15, 26, 0.55);
+  --border: rgba(11, 15, 26, 0.14);
+  --panel: rgba(11, 15, 26, 0.04);
+  --panel-2: rgba(11, 15, 26, 0.07);
+  --warning-border: rgba(217, 119, 6, 0.35);
+  --warning-bg: rgba(217, 119, 6, 0.10);
+  --warning-text: #92400e;
+  --success-text: #065f46;
+  --error-text: #991b1b;
+  --error-border: rgba(153, 27, 27, 0.30);
+  --error-bg: rgba(153, 27, 27, 0.08);
+}
+
+html[data-theme="dark"] {
+  --background: #0b0f1a;
+  --foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.70);
+  --muted-2: rgba(255, 255, 255, 0.55);
+  --border: rgba(255, 255, 255, 0.12);
+  --panel: rgba(255, 255, 255, 0.04);
+  --panel-2: rgba(255, 255, 255, 0.07);
 }
 
 @theme inline {

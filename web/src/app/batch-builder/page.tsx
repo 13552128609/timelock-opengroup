@@ -493,7 +493,7 @@ export default function BatchBuilderPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="text-xl font-semibold">Schedule Open Storeman Group</div>
-          <div className="text-sm text-white/60 mt-1">Build scheduleBatch payloads for SMG + GPK</div>
+          <div className="text-sm text-[var(--muted)] mt-1">Build scheduleBatch payloads for SMG + GPK</div>
         </div>
       </div>
 
@@ -501,7 +501,7 @@ export default function BatchBuilderPage() {
         {({ allowed, reason }) => (
           <div className="space-y-6">
             {!allowed ? (
-              <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing PROPOSER role"}
               </div>
             ) : null}
@@ -619,7 +619,7 @@ export default function BatchBuilderPage() {
 
             <Card title="storemanGroupRegisterStart struct (SMG)">
               <details>
-                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                 <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label>memberCountDesign</Label>
@@ -668,7 +668,7 @@ export default function BatchBuilderPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card title="GPK.setPeriod">
                 <details>
-                  <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                  <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                   <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label>CommitPeriod (uint32)</Label>
@@ -688,7 +688,7 @@ export default function BatchBuilderPage() {
 
               <Card title="GPK.setGpkCfg">
                 <details>
-                  <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                  <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                   <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>curIndex (uint256[], one per line)</Label>
@@ -705,7 +705,7 @@ export default function BatchBuilderPage() {
 
             <Card title="Timelock params">
               <details>
-                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                 <div className="pt-4 grid grid-cols-1 gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -723,7 +723,7 @@ export default function BatchBuilderPage() {
 
             <Card title="Generated scheduleBatch">
               <details>
-                <summary className="cursor-pointer select-none text-xs text-white/60">details</summary>
+                <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                 <div className="pt-4 grid grid-cols-1 gap-4">
                   {parsed.errors.length ? (
                     <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
@@ -736,7 +736,7 @@ export default function BatchBuilderPage() {
                     <Textarea
                       value={JSON.stringify(parsed.summary, null, 2)}
                       readOnly
-                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                      className="font-mono text-xs bg-[var(--panel)] text-[var(--muted-2)] border-[var(--border)]"
                     />
                   </div>
 
@@ -745,7 +745,7 @@ export default function BatchBuilderPage() {
                     <Textarea
                       value={JSON.stringify(parsed.targets, null, 2)}
                       readOnly
-                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                      className="font-mono text-xs bg-[var(--panel)] text-[var(--muted-2)] border-[var(--border)]"
                     />
                   </div>
 
@@ -754,7 +754,7 @@ export default function BatchBuilderPage() {
                     <Textarea
                       value={JSON.stringify(parsed.values.map((x) => x.toString()), null, 2)}
                       readOnly
-                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5"
+                      className="font-mono text-xs bg-[var(--panel)] text-[var(--muted-2)] border-[var(--border)]"
                     />
                   </div>
 
@@ -763,7 +763,7 @@ export default function BatchBuilderPage() {
                     <Textarea
                       value={JSON.stringify(parsed.payloads, null, 2)}
                       readOnly
-                      className="font-mono text-xs bg-white/5 text-white/50 border-white/5 break-all"
+                      className="font-mono text-xs bg-[var(--panel)] text-[var(--muted-2)] border-[var(--border)] break-all"
                     />
                   </div>
                 </div>

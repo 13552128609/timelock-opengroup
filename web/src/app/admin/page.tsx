@@ -73,7 +73,7 @@ export default function AdminPage() {
   });
 
   const RoleBadge = ({ value }: { value: boolean | null }) => {
-    if (value === null) return <span className="text-white/40">-</span>;
+    if (value === null) return <span className="text-[var(--muted-2)]">-</span>;
     return value ? (
       <span className="inline-flex items-center rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-xs font-medium text-emerald-200">
         true
@@ -89,14 +89,14 @@ export default function AdminPage() {
     <AppShell>
       <div className="mb-6">
         <div className="text-xl font-semibold">ADMIN</div>
-        <div className="text-sm text-white/60 mt-1">Manage timelock roles</div>
+        <div className="text-sm text-[var(--muted)] mt-1">Manage timelock roles</div>
       </div>
 
       <RoleGate role={TIMELOCK_ADMIN_ROLE}>
         {({ allowed, reason }) => (
           <div className="space-y-6">
             {!allowed ? (
-              <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing TIMELOCK_ADMIN role"}
               </div>
             ) : null}
@@ -182,7 +182,7 @@ export default function AdminPage() {
                   <Input value={lookupAddr} onChange={(e) => setLookupAddr(e.target.value)} />
                 </div>
 
-                <div className="rounded-lg border border-white/10 bg-black/20 p-4 text-sm">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 text-sm">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="flex items-center justify-between gap-3">
                       <span>TIMELOCK_ADMIN_ROLE</span>
