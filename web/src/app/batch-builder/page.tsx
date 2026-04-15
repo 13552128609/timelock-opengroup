@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { encodeFunctionData, pad, stringToHex } from "viem";
 import { AppShell } from "@/components/AppShell";
@@ -195,6 +195,8 @@ export default function BatchBuilderPage() {
     storemanGroupRegisterStartDefaultParams,
     setPeriodDefaultParams,
     setGpkCfgDefaultParams,
+    grpPrex: selectedGrpPrex,
+    needsGroupSelection,
   } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -255,6 +257,12 @@ export default function BatchBuilderPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cmdFlags]);
 
+  useEffect(() => {
+    if (typeof selectedGrpPrex === "string" && selectedGrpPrex.trim()) {
+      setGrpPrex(selectedGrpPrex.trim());
+    }
+  }, [selectedGrpPrex]);
+
   const [memberCountDesign, setMemberCountDesign] = useState("");
   const [threshold, setThreshold] = useState("");
   const [chain1, setChain1] = useState("");
@@ -280,7 +288,48 @@ export default function BatchBuilderPage() {
   const [salt, setSalt] = useState("0x" + "0".repeat(64));
   const [delay, setDelay] = useState("0");
 
+  const lastAppliedDefaultsForGrpPrexRef = useRef<string>("");
+
   useEffect(() => {
+    const grpKey = (selectedGrpPrex || "").trim();
+    const shouldOverwrite = grpKey && lastAppliedDefaultsForGrpPrexRef.current !== grpKey;
+
+    if (shouldOverwrite) {
+      lastAppliedDefaultsForGrpPrexRef.current = grpKey;
+
+      const smg = storemanGroupRegisterStartDefaultParams;
+      if (smg) {
+        if (Array.isArray(smg.wkAddrs)) setWkAddrs(smg.wkAddrs.length ? smg.wkAddrs.join("\n") : "0x");
+        if (Array.isArray(smg.senders)) setSenders(smg.senders.length ? smg.senders.join("\n") : "0x");
+
+        setMemberCountDesign(smg.memberCountDesign ?? "");
+        setThreshold(smg.threshold ?? "");
+        setChain1(smg.chain1 ?? "");
+        setChain2(smg.chain2 ?? "");
+        setCurve1(smg.curve1 ?? "");
+        setCurve2(smg.curve2 ?? "");
+        setMinStakeIn(smg.minStakeIn ?? "");
+        setMinDelegateIn(smg.minDelegateIn ?? "");
+        setMinPartIn(smg.minPartIn ?? "");
+        setDelegateFee(smg.delegateFee ?? "");
+      }
+
+      const sp = setPeriodDefaultParams;
+      if (sp) {
+        setPloyCommitPeriod(sp.ployCommitPeriod ?? "");
+        setDefaultPeriod(sp.defaultPeriod ?? "");
+        setNegotiatePeriod(sp.negotiatePeriod ?? "");
+      }
+
+      const sg = setGpkCfgDefaultParams;
+      if (sg) {
+        if (Array.isArray(sg.curIndex)) setCurIndex(sg.curIndex.length ? sg.curIndex.join("\n") : "");
+        if (Array.isArray(sg.algoIndex)) setAlgoIndex(sg.algoIndex.length ? sg.algoIndex.join("\n") : "");
+      }
+
+      return;
+    }
+
     const smg = storemanGroupRegisterStartDefaultParams;
     if (smg) {
       if (Array.isArray(smg.wkAddrs) && smg.wkAddrs.length > 0 && (wkAddrs === "0x" || wkAddrs.trim() === "")) {
@@ -322,6 +371,7 @@ export default function BatchBuilderPage() {
     storemanGroupRegisterStartDefaultParams,
     setPeriodDefaultParams,
     setGpkCfgDefaultParams,
+    selectedGrpPrex,
     wkAddrs,
     senders,
     memberCountDesign,
@@ -500,6 +550,12 @@ export default function BatchBuilderPage() {
       <RoleGate role={PROPOSER_ROLE}>
         {({ allowed, reason }) => (
           <div className="space-y-6">
+            {needsGroupSelection ? (
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
+                Please select a group (grpPrex) in the top-right header.
+              </div>
+            ) : null}
+
             {!allowed ? (
               <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing PROPOSER role"}

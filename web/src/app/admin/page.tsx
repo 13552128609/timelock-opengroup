@@ -18,7 +18,14 @@ import {
 } from "@/lib/timelock";
 
 export default function AdminPage() {
-  const { timelockAddr } = useActiveNetworkConfig();
+  const {
+    timelockAddr,
+    grpPrex,
+    rpcUrl,
+    smgContractAddr,
+    gpkContractAddr,
+    needsGroupSelection,
+  } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const { sendTx } = useTxFeedback();
@@ -95,6 +102,12 @@ export default function AdminPage() {
       <RoleGate role={TIMELOCK_ADMIN_ROLE}>
         {({ allowed, reason }) => (
           <div className="space-y-6">
+            {needsGroupSelection ? (
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
+                Please select a group (grpPrex) in the top-right header.
+              </div>
+            ) : null}
+
             {!allowed ? (
               <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing TIMELOCK_ADMIN role"}

@@ -131,7 +131,7 @@ function decodeCall(
 }
 
 export default function ExecutorPage() {
-  const { timelockAddr, smgContractAddr, gpkContractAddr } = useActiveNetworkConfig();
+  const { timelockAddr, smgContractAddr, gpkContractAddr, needsGroupSelection } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const publicClient = usePublicClient();
@@ -350,6 +350,12 @@ export default function ExecutorPage() {
       <RoleGate role={EXECUTOR_ROLE}>
         {({ allowed, reason }) => (
           <div className="space-y-6">
+            {needsGroupSelection ? (
+              <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
+                Please select a group (grpPrex) in the top-right header.
+              </div>
+            ) : null}
+
             {!allowed ? (
               <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-text)]">
                 {reason ?? "Missing EXECUTOR role"}

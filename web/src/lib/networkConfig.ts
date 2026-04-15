@@ -2,6 +2,7 @@
 
 import { useChainId } from "wagmi";
 import { useRepoConfig } from "@/lib/useRepoConfig";
+import { useSelectedGroup } from "@/lib/useSelectedGroup";
 
 export function useActiveNetworkConfig() {
   const chainId = useChainId();
@@ -9,7 +10,7 @@ export function useActiveNetworkConfig() {
 
   const section = chainId === 888 ? "mainnet" : chainId === 999 ? "testnet" : null;
 
-  const grpPrex = process.env.NEXT_PUBLIC_GRP_PREX ?? "";
+  const { selected: grpPrex, availableGroups, needsSelection, setSelected } = useSelectedGroup(section, data);
 
   const group = section && data && grpPrex ? data[section]?.groups?.[grpPrex] : null;
 
@@ -25,6 +26,9 @@ export function useActiveNetworkConfig() {
     chainId,
     section,
     grpPrex,
+    availableGroups,
+    needsGroupSelection: needsSelection,
+    setGrpPrex: setSelected,
     rpcUrl,
     smgContractAddr,
     gpkContractAddr,
