@@ -126,6 +126,10 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function buildNetworkRuntime(network, grpPrex) {
   const cfg = readRepoConfig();
   const net = cfg?.[network];
@@ -154,6 +158,12 @@ function buildNetworkRuntime(network, grpPrex) {
       GPK: net.gpkContractAddr,
     },
   };
+}
+
+function getEthersNetwork(network) {
+  if (network === "testnet") return { chainId: 999, name: "wanchain-testnet" };
+  if (network === "mainnet") return { chainId: 888, name: "wanchain" };
+  return "any";
 }
 
 function askHidden(question) {
@@ -349,7 +359,10 @@ async function runOnce(args) {
 
 async function initRuntimeContext(args) {
   const runtime = buildNetworkRuntime(args.network, args.grpPrex);
-  const provider = new ethers.JsonRpcProvider(runtime.rpcUrl);
+  const provider = new ethers.JsonRpcProvider(runtime.rpcUrl, getEthersNetwork(args.network), {
+    staticNetwork: true,
+    timeout: 30_000,
+  });
 
   const password = await askHidden("Keystore password: ");
   const wallet = await loadWalletFromKeystore({ keystorePath: args.keystore, password });
@@ -465,10 +478,17 @@ async function main() {
     finalCron,
     async () => {
       console.log(`[${nowIso()}] cron fired`);
-      try {
-        await runOnceWithContext(args, ctx);
-      } catch (e) {
-        console.error(`[${nowIso()}] runOnce error:`, String(e?.stack || e?.message || e));
+      for (let attempt = 1; attempt <= 10; attempt++) {
+        try {
+          await runOnceWithContext(args, ctx);
+          return;
+        } catch (e) {
+          console.error(
+            `[${nowIso()}] runOnce error (attempt ${attempt}/10):`,
+            String(e?.stack || e?.message || e)
+          );
+          if (attempt < 10) await sleep(1000);
+        }
       }
     },
     { timezone: "UTC" }
@@ -479,3 +499,7 @@ main().catch((e) => {
   console.error(String(e?.stack || e?.message || e));
   process.exit(1);
 });
+
+// node bin/executorAuto.js --network testnet --grpPrex Aries --keystore ~/keystore/0x55bb44070e7f1b505b6abf499ad2cb72f81f3ac2 --cron "0 4 * * *"
+// node bin/executorAuto.js --network testnet --grpPrex Aries --keystore ~/keystore/0x55bb44070e7f1b505b6abf499ad2cb72f81f3ac2 --once --dryRun
+// node bin/executorAuto.js --network testnet --grpPrex Aries --keystore ~/keystore/0x55bb44070e7f1b505b6abf499ad2cb72f81f3ac2 --dryRun --cron "1 * * * *"

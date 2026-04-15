@@ -229,3 +229,6 @@ main().catch((error) => {
 
 //node bin/getEvent.js --network testnet --beforeBlock 518400 timelock CallExecuted
 //node bin/getEvent.js --network testnet --beforeBlock 518400 smg StoremanGroupRegisterStartEvent
+
+// node bin/getEvent.js --network mainnet --beforeBlock 518400 gp StoremanGroupRegisterStartEvent
+// node bin/getEvent.js --network mainnet --beforeBlock 518400 gpk setGpkCfgEvent

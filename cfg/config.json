@@ -179,9 +179,9 @@
   },
   "mainnet": {
     "url": "https://gwan-ssl.wandevs.org:56891",
-    "gpkContractAddr": "0xfc86ad558163c4933ebcfa217945af6e9a3bce06",
-    "smgContractAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
-    "timelockAddr": "0x1e7450d5d17338a348c5438546f0b4d0a5fbeab6",
+    "gpkContractAddr": "0x41FDd39a062F49dc6E790DFD945c388082d87B2F",
+    "smgContractAddr": "0x3071aa4D28e1614E5287E56A141C29491a36B176",
+    "timelockAddr": "0xAC9Be43e3581feC846F6acC7FE3d2003a128f29a",
     "groups": {
       "Aries": {
         "cron": "0 4 * * *",
