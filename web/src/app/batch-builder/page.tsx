@@ -657,13 +657,13 @@ export default function BatchBuilderPage() {
             <Card title="Command line">
               <div className="grid grid-cols-1 gap-4">
                 {cmdLineError ? (
-                  <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                  <div className="rounded-lg border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm text-[var(--error-text)]">
                     {cmdLineError}
                   </div>
                 ) : null}
 
                 {parsed.errors.length > 0 ? (
-                  <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200 whitespace-pre-wrap">
+                  <div className="rounded-lg border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm text-[var(--error-text)] whitespace-pre-wrap">
                     {parsed.errors.join("\n")}
                   </div>
                 ) : null}
@@ -676,23 +676,24 @@ export default function BatchBuilderPage() {
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <Button onClick={applyCmdLine}>Apply to fields</Button>
                   <Button
                     disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
                     onClick={async () => {
-                      if (!timelockAddr || timelockAddr === "") return;
-
-                      const targets = parsed.targets as any;
-                      const values = parsed.values as any;
-                      const payloads = parsed.payloads as any;
-
+                      if (!timelockAddr) throw new Error("Missing timelockAddr");
                       await sendTx(
                         () =>
                           writeContractAsync({
+                            address: timelockAddr,
                             abi: timelockAbi,
-                            address: timelockAddr as `0x${string}`,
                             functionName: "scheduleBatch",
-                            args: [targets, values, payloads, predecessor as any, salt as any, parsed.delay],
+                            args: [
+                              parsed.targets,
+                              parsed.values,
+                              parsed.payloads,
+                              predecessor as `0x${string}`,
+                              salt as `0x${string}`,
+                              parsed.delay,
+                            ],
                           }),
                         "Schedule batch"
                       );
@@ -876,11 +877,11 @@ export default function BatchBuilderPage() {
             </Card>
 
             <Card title="Generated scheduleBatch">
-              <details>
+              <details className="rounded-xl border border-[var(--border)] bg-[var(--panel)] px-5 py-4">
                 <summary className="cursor-pointer select-none text-xs text-[var(--muted)]">details</summary>
                 <div className="pt-4 grid grid-cols-1 gap-4">
                   {parsed.errors.length ? (
-                    <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                    <div className="rounded-lg border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm text-[var(--error-text)] whitespace-pre-wrap">
                       {parsed.errors.join("\n")}
                     </div>
                   ) : null}
