@@ -394,6 +394,18 @@ export default function BatchBuilderPage() {
   const parsed = useMemo(() => {
     const errors: string[] = [];
 
+    const ensureUint256 = (v: bigint, label: string) => {
+      if (v < BigInt(0)) {
+        errors.push(`${label} is negative (${v.toString()}). Check date/time format.`);
+        return BigInt(0);
+      }
+      return v;
+    };
+
+    const requireGt = (a: bigint, b: bigint, msg: string) => {
+      if (!(a > b)) errors.push(msg);
+    };
+
     const groupIdRaw = (gid || "").trim();
     const preGroupIdRaw = (pgid || "").trim();
 
@@ -416,6 +428,19 @@ export default function BatchBuilderPage() {
       errors.push(String(e?.message || e));
     }
 
+    regEndTs = ensureUint256(regEndTs, "regEnd");
+    openGroupTs = ensureUint256(openGroupTs, "openGroupTime");
+    gpkEndTs = ensureUint256(gpkEndTs, "gpkEnd");
+    wkStartTs = ensureUint256(wkStartTs, "wkStart");
+    wkEndTs = ensureUint256(wkEndTs, "wkEnd");
+
+    if (errors.length === 0) {
+      requireGt(regEndTs, openGroupTs, "Constraint violated: regEnd must be > openGroupTime");
+      requireGt(gpkEndTs, regEndTs, "Constraint violated: gpkEnd must be > regEnd");
+      requireGt(wkStartTs, gpkEndTs, "Constraint violated: wkStart must be > gpkEnd");
+      requireGt(wkEndTs, wkStartTs, "Constraint violated: wkEnd must be > wkStart");
+    }
+
     const registerDuration =
       regEndTs > openGroupTs && openGroupTs > BigInt(0) ? regEndTs - openGroupTs : BigInt(0);
     const totalTime = wkEndTs > wkStartTs ? wkEndTs - wkStartTs : BigInt(0);
@@ -423,8 +448,41 @@ export default function BatchBuilderPage() {
     const nowTs = BigInt(Math.floor(Date.now() / 1000));
     const computedDelay = openGroupTs > nowTs ? openGroupTs - nowTs : BigInt(0);
 
+    if (errors.length === 0 && computedDelay <= BigInt(0)) {
+      errors.push("Constraint violated: delay must be > 0 (openGroupTime must be in the future)");
+    }
+
     const wkList = wkAddrs.trim() === "0x" ? [] : parseLines(wkAddrs);
     const senderList = senders.trim() === "0x" ? [] : parseLines(senders);
+
+    if (errors.length > 0) {
+      const summary = {
+        grpPrex: (grpPrex || "").trim(),
+        groupIdRaw,
+        preGroupIdRaw,
+        groupIdBytes32,
+        preGroupIdBytes32,
+        regEndTs: regEndTs.toString(),
+        openGroupTs: openGroupTs.toString(),
+        gpkEndTs: gpkEndTs.toString(),
+        wkStartTs: wkStartTs.toString(),
+        wkEndTs: wkEndTs.toString(),
+        registerDuration: "0",
+        totalTime: "0",
+        delay: "0",
+        wkCount: wkList.length,
+        senderCount: senderList.length,
+      };
+
+      return {
+        errors,
+        summary,
+        delay: BigInt(0),
+        targets: [] as string[],
+        values: [] as bigint[],
+        payloads: [] as `0x${string}`[],
+      };
+    }
 
     const smgArgs = {
       groupId: groupIdBytes32,
@@ -444,31 +502,65 @@ export default function BatchBuilderPage() {
       delegateFee: BigInt(delegateFee || "0"),
     };
 
-    const smgPayload = encodeFunctionData({
-      abi: smgAbi,
-      functionName: "storemanGroupRegisterStart",
-      args: [smgArgs as any, wkList as any, senderList as any],
-    });
+    let smgPayload: `0x${string}` = "0x";
+    let setPeriodPayload: `0x${string}` = "0x";
+    let setGpkCfgPayload: `0x${string}` = "0x";
 
-    const setPeriodPayload = encodeFunctionData({
-      abi: gpkAbi,
-      functionName: "setPeriod",
-      args: [
-        groupIdBytes32 as any,
-        Number(ployCommitPeriod || "0"),
-        Number(defaultPeriod || "0"),
-        Number(negotiatePeriod || "0"),
-      ] as any,
-    });
+    try {
+      smgPayload = encodeFunctionData({
+        abi: smgAbi,
+        functionName: "storemanGroupRegisterStart",
+        args: [smgArgs as any, wkList as any, senderList as any],
+      });
 
-    const cur = parseLines(curIndex).map((x) => BigInt(x));
-    const algo = parseLines(algoIndex).map((x) => BigInt(x));
+      setPeriodPayload = encodeFunctionData({
+        abi: gpkAbi,
+        functionName: "setPeriod",
+        args: [
+          groupIdBytes32 as any,
+          Number(ployCommitPeriod || "0"),
+          Number(defaultPeriod || "0"),
+          Number(negotiatePeriod || "0"),
+        ] as any,
+      });
 
-    const setGpkCfgPayload = encodeFunctionData({
-      abi: gpkAbi,
-      functionName: "setGpkCfg",
-      args: [groupIdBytes32 as any, cur as any, algo as any],
-    });
+      const cur = parseLines(curIndex).map((x) => BigInt(x));
+      const algo = parseLines(algoIndex).map((x) => BigInt(x));
+
+      setGpkCfgPayload = encodeFunctionData({
+        abi: gpkAbi,
+        functionName: "setGpkCfg",
+        args: [groupIdBytes32 as any, cur as any, algo as any],
+      });
+    } catch (e: any) {
+      errors.push(String(e?.message || e));
+      const summary = {
+        grpPrex: (grpPrex || "").trim(),
+        groupIdRaw,
+        preGroupIdRaw,
+        groupIdBytes32,
+        preGroupIdBytes32,
+        regEndTs: regEndTs.toString(),
+        openGroupTs: openGroupTs.toString(),
+        gpkEndTs: gpkEndTs.toString(),
+        wkStartTs: wkStartTs.toString(),
+        wkEndTs: wkEndTs.toString(),
+        registerDuration: "0",
+        totalTime: "0",
+        delay: "0",
+        wkCount: wkList.length,
+        senderCount: senderList.length,
+      };
+
+      return {
+        errors,
+        summary,
+        delay: BigInt(0),
+        targets: [] as string[],
+        values: [] as bigint[],
+        payloads: [] as `0x${string}`[],
+      };
+    }
 
     const targets = [smgContractAddr, gpkContractAddr, gpkContractAddr].filter(Boolean) as string[];
     const values = [BigInt(0), BigInt(0), BigInt(0)];
@@ -567,6 +659,12 @@ export default function BatchBuilderPage() {
                 {cmdLineError ? (
                   <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
                     {cmdLineError}
+                  </div>
+                ) : null}
+
+                {parsed.errors.length > 0 ? (
+                  <div className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200 whitespace-pre-wrap">
+                    {parsed.errors.join("\n")}
                   </div>
                 ) : null}
                 <div>
