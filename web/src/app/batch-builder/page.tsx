@@ -18,6 +18,10 @@ function toBytes32FromAscii(s: string) {
   return out as `0x${string}`;
 }
 
+function isHexAddress(s: string): s is `0x${string}` {
+  return /^0x[a-fA-F0-9]{40}$/.test((s || "").trim());
+}
+
 function toUnixSeconds(input: string): bigint {
   // Accept: "YYYY/MM/DD-HH:mm:ss" or any Date-parsable string.
   const raw = (input || "").trim();
@@ -478,7 +482,7 @@ export default function BatchBuilderPage() {
         errors,
         summary,
         delay: BigInt(0),
-        targets: [] as string[],
+        targets: [] as `0x${string}`[],
         values: [] as bigint[],
         payloads: [] as `0x${string}`[],
       };
@@ -556,15 +560,15 @@ export default function BatchBuilderPage() {
         errors,
         summary,
         delay: BigInt(0),
-        targets: [] as string[],
+        targets: [] as `0x${string}`[],
         values: [] as bigint[],
         payloads: [] as `0x${string}`[],
       };
     }
 
-    const targets = [smgContractAddr, gpkContractAddr, gpkContractAddr].filter(Boolean) as string[];
-    const values = [BigInt(0), BigInt(0), BigInt(0)];
-    const payloads = [smgPayload, setPeriodPayload, setGpkCfgPayload];
+    const rawTargets = [smgContractAddr, gpkContractAddr, gpkContractAddr].filter(
+      (x): x is string => typeof x === "string" && x.trim() !== ""
+    );
 
     const summary = {
       grpPrex: (grpPrex || "").trim(),
@@ -583,6 +587,21 @@ export default function BatchBuilderPage() {
       wkCount: wkList.length,
       senderCount: senderList.length,
     };
+
+    const targets = rawTargets.filter(isHexAddress);
+    if (targets.length !== 3) {
+      errors.push("Missing or invalid contract addresses for batch targets");
+      return {
+        errors,
+        summary,
+        delay: BigInt(0),
+        targets: [] as `0x${string}`[],
+        values: [] as bigint[],
+        payloads: [] as `0x${string}`[],
+      };
+    }
+    const values = [BigInt(0), BigInt(0), BigInt(0)];
+    const payloads = [smgPayload, setPeriodPayload, setGpkCfgPayload];
 
     return {
       errors,
@@ -680,6 +699,7 @@ export default function BatchBuilderPage() {
                     disabled={!allowed || disabled || parsed.errors.length > 0 || parsed.targets.length !== 3}
                     onClick={async () => {
                       if (!timelockAddr) throw new Error("Missing timelockAddr");
+                      if (!isHexAddress(timelockAddr)) throw new Error("Invalid timelockAddr");
                       await sendTx(
                         () =>
                           writeContractAsync({
