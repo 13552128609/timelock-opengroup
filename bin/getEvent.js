@@ -14,6 +14,7 @@ function parseArgs(argv) {
     network: "mainnet",
     grpPrex: "",
     beforeBlock: 518400,
+    scAddr: "",
     positional: [],
   };
 
@@ -40,9 +41,18 @@ function parseArgs(argv) {
       i++;
       continue;
     }
+    if (a === "--scAddr") {
+      out.scAddr = argv[i + 1] || "";
+      i++;
+      continue;
+    }
     out.positional.push(a);
   }
   return out;
+}
+
+function isHexAddress(s) {
+  return /^0x[a-fA-F0-9]{40}$/.test(String(s || "").trim());
 }
 
 function buildNetworkRuntime(network, grpPrex) {
@@ -137,16 +147,19 @@ function formatArgsWithNames(event) {
 
 function printUsageAndExit() {
   console.log(
-    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)]  [--beforeBlock N (default 518400)] <gpk|smg|timelock> <eventName>"
+    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] [--scAddr 0x...] <gpk|smg|timelock> <eventName>"
   );
   console.log(
     "Example: node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
+  );
+  console.log(
+    "Example (override address): node bin/getEvent.js --network mainnet --beforeBlock 10000 --scAddr 0x... smg StoremanGroupRegisterStartEvent"
   );
   process.exit(1);
 }
 
 async function main() {
-  const { network, grpPrex, beforeBlock, positional } = parseArgs(process.argv.slice(2));
+  const { network, grpPrex, beforeBlock, scAddr, positional } = parseArgs(process.argv.slice(2));
   const rawContractInput = positional[0];
   const contractArg = (positional[0] || "").toUpperCase();
   const eventName = positional[1];
@@ -185,7 +198,11 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   
   // 实例化合约
-  const contractAddress = CONTRACT_ADDRESS[contractArg];
+  const contractAddress = scAddr && scAddr.trim() !== "" ? scAddr.trim() : CONTRACT_ADDRESS[contractArg];
+  if (!isHexAddress(contractAddress)) {
+    console.error("Invalid contract address:", contractAddress);
+    process.exit(1);
+  }
   const contractAbi = ABI[contractArg];
   const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
@@ -230,5 +247,7 @@ main().catch((error) => {
 //node bin/getEvent.js --network testnet --beforeBlock 518400 timelock CallExecuted
 //node bin/getEvent.js --network testnet --beforeBlock 518400 smg StoremanGroupRegisterStartEvent
 
-// node bin/getEvent.js --network mainnet --beforeBlock 518400 gp StoremanGroupRegisterStartEvent
+// node bin/getEvent.js --network mainnet --beforeBlock 518400 smg StoremanGroupRegisterStartEvent
 // node bin/getEvent.js --network mainnet --beforeBlock 518400 gpk setGpkCfgEvent
+
+// node bin/getEvent.js --network testnet --beforeBlock 518400 --scAddr 0xaA5A0f7F99FA841F410aafD97E8C435c75c22821 smg StoremanGroupDismissedEvent
