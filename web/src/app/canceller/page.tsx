@@ -97,6 +97,71 @@ function formatTsSeconds(ts: bigint | null | undefined) {
   return `${n} (${new Date(n * 1000).toISOString()})`;
 }
 
+function bytes32ToText(value: unknown) {
+  if (typeof value !== "string" || !value.startsWith("0x")) return null;
+  const hex = value.slice(2);
+  const chars: string[] = [];
+  for (let i = 0; i < hex.length; i += 2) {
+    const byte = hex.slice(i, i + 2);
+    if (!byte || byte === "00") continue;
+    chars.push(String.fromCharCode(Number.parseInt(byte, 16)));
+  }
+  return chars.join("") || null;
+}
+
+function toBigIntValue(value: unknown) {
+  if (typeof value === "bigint") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return BigInt(Math.trunc(value));
+  if (typeof value === "string" && value.trim() !== "") {
+    try {
+      return BigInt(value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function findPloyCommitPeriodForOperation(id: `0x${string}`, ops: Array<{ id: `0x${string}`; decoded: DecodedCall | null }>) {
+  const found = ops.find(
+    (x) =>
+      x.id.toLowerCase() === id.toLowerCase() &&
+      x.decoded?.kind === "decoded" &&
+      x.decoded.functionName === "setPeriod"
+  );
+  return found?.decoded?.kind === "decoded" ? toBigIntValue(found.decoded.args.ployCommitPeriod) : null;
+}
+
+function getStoremanGroupRegisterStartDerived(
+  op: {
+    id: `0x${string}`;
+    timestamp: bigint | null;
+    decoded: DecodedCall | null;
+  },
+  ops: Array<{ id: `0x${string}`; decoded: DecodedCall | null }>
+) {
+  if (op.decoded?.kind !== "decoded" || op.decoded.functionName !== "storemanGroupRegisterStart") return null;
+
+  const args = op.decoded.args;
+  const workTime = toBigIntValue(args.workTime);
+  const totalTime = toBigIntValue(args.totalTime);
+  const registerDuration = toBigIntValue(args.registerDuration);
+  const ployCommitPeriod = findPloyCommitPeriodForOperation(op.id, ops);
+
+  const workingEndTime = workTime !== null && totalTime !== null ? workTime + totalTime : null;
+  const regEndTime = op.timestamp !== null && registerDuration !== null ? op.timestamp + registerDuration : null;
+  const gpkEndTime = regEndTime !== null && ployCommitPeriod !== null ? regEndTime + ployCommitPeriod : null;
+
+  return {
+    groupName: bytes32ToText(args.groupId) ?? "-",
+    parentGroupName: bytes32ToText(args.preGroupId) ?? "-",
+    regEndTime,
+    gpkEndTime,
+    workingStartTime: workTime,
+    workingEndTime,
+  };
+}
+
 export default function CancellerPage() {
   const { timelockAddr, smgContractAddr, gpkContractAddr, needsGroupSelection } = useActiveNetworkConfig();
   const { isConnected } = useAccount();
@@ -309,7 +374,7 @@ export default function CancellerPage() {
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>blocksBack (Abount 30days)</Label>
+                    <Label>blocksBack (About 30days)</Label>
                     <Input value={blocksBack} onChange={(e) => setBlocksBack(e.target.value)} />
                   </div>
                   <div className="flex items-end gap-3">
@@ -340,73 +405,88 @@ export default function CancellerPage() {
                   {ops.length === 0 ? (
                     <div className="text-sm text-[var(--muted)]">No cancellable CallScheduled events in this range.</div>
                   ) : (
-                    ops.map((op) => (
-                      <div key={`${op.id}-${op.index.toString()}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-                        <div className="grid grid-cols-1 gap-2">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="font-mono text-xs break-all">id: {op.id}</div>
-                            <Button
-                              disabled={!allowed || !isConnected || !timelockAddr || timelockAddr === "" || isPending}
-                              onClick={async () => {
-                                if (!timelockAddr || timelockAddr === "") return;
-                                const res = await sendTx(
-                                  () =>
-                                    writeContractAsync({
-                                      abi: timelockAbi,
-                                      address: timelockAddr as `0x${string}`,
-                                      functionName: "cancel",
-                                      args: [op.id as any],
-                                    }),
-                                  "Cancel operation"
-                                );
+                    ops.map((op) => {
+                      const derived = getStoremanGroupRegisterStartDerived(op, ops);
 
-                                if (res.status === "success") {
-                                  setOps((prev) => prev.filter((x) => x.id.toLowerCase() !== op.id.toLowerCase()));
-                                }
-                              }}
-                            >
-                              {isPending ? "Submitting..." : "Cancel"}
-                            </Button>
-                          </div>
+                      return (
+                        <div key={`${op.id}-${op.index.toString()}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+                          <div className="grid grid-cols-1 gap-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="font-mono text-xs break-all">id: {op.id}</div>
+                              <Button
+                                disabled={!allowed || !isConnected || !timelockAddr || timelockAddr === "" || isPending}
+                                onClick={async () => {
+                                  if (!timelockAddr || timelockAddr === "") return;
+                                  const res = await sendTx(
+                                    () =>
+                                      writeContractAsync({
+                                        abi: timelockAbi,
+                                        address: timelockAddr as `0x${string}`,
+                                        functionName: "cancel",
+                                        args: [op.id as any],
+                                      }),
+                                    "Cancel operation"
+                                  );
 
-                          <div className="text-xs text-[var(--muted)] grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div className="font-mono break-all">target: {op.target}</div>
-                            <div>value: {op.value === BigInt(0) ? "0" : formatUnits(op.value, 18)}</div>
-                            <div>delay: {op.delay.toString()} sec</div>
-                            <div>timestamp: {formatTsSeconds(op.timestamp) ?? "-"}</div>
-                            <div>pending: {String(op.pending)}</div>
-                            <div>ready: {String(op.ready)}</div>
-                            <div>done: {String(op.done)}</div>
-                            <div className="font-mono break-all">tx: {op.txHash}</div>
-                          </div>
+                                  if (res.status === "success") {
+                                    setOps((prev) => prev.filter((x) => x.id.toLowerCase() !== op.id.toLowerCase()));
+                                  }
+                                }}
+                              >
+                                {isPending ? "Submitting..." : "Cancel"}
+                              </Button>
+                            </div>
 
-                          <div className="text-xs">
-                            <div className="font-semibold mb-1">decoded</div>
-                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3">
-                              {op.decoded
-                                ? op.decoded.kind === "decoded"
-                                  ? JSON.stringify(
-                                      {
-                                        functionName: op.decoded.functionName,
-                                        args: op.decoded.args,
-                                      },
-                                      (_, v) => (typeof v === "bigint" ? v.toString() : v),
-                                      2
-                                    )
-                                  : JSON.stringify({ kind: "unknown", reason: op.decoded.reason }, null, 2)
-                                : "null"}
-                            </pre>
-                          </div>
+                            <div className="text-xs text-[var(--muted)] grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="font-mono break-all">target: {op.target}</div>
+                              <div>value: {op.value === BigInt(0) ? "0" : formatUnits(op.value, 18)}</div>
+                              <div>delay: {op.delay.toString()} sec</div>
+                              <div>timestamp: {formatTsSeconds(op.timestamp) ?? "-"}</div>
+                              <div>pending: {String(op.pending)}</div>
+                              <div>ready: {String(op.ready)}</div>
+                              <div>done: {String(op.done)}</div>
+                              <div className="font-mono break-all">tx: {op.txHash}</div>
+                            </div>
 
-                          <div className="text-xs">
-                            <div className="font-semibold mb-1">raw calldata</div>
-                            <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3 break-all">
-                              {op.data}
-                            </pre>
+                            {derived ? (
+                              <div className="text-xs text-[var(--muted)] grid grid-cols-1 md:grid-cols-2 gap-2 rounded-md border border-[var(--border)] bg-[var(--panel)] p-3">
+                                <div>groupName: {derived.groupName}</div>
+                                <div>parentGroupName: {derived.parentGroupName}</div>
+                                <div>regEndTime: {formatTsSeconds(derived.regEndTime) ?? "-"}</div>
+                                <div>gpkEndTime: {formatTsSeconds(derived.gpkEndTime) ?? "-"}</div>
+                                <div>workingStartTime: {formatTsSeconds(derived.workingStartTime) ?? "-"}</div>
+                                <div>workingEndTime: {formatTsSeconds(derived.workingEndTime) ?? "-"}</div>
+                              </div>
+                            ) : null}
+
+                            <div className="text-xs">
+                              <div className="font-semibold mb-1">decoded</div>
+                              <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3">
+                                {op.decoded
+                                  ? op.decoded.kind === "decoded"
+                                    ? JSON.stringify(
+                                        {
+                                          functionName: op.decoded.functionName,
+                                          args: op.decoded.args,
+                                        },
+                                        (_, v) => (typeof v === "bigint" ? v.toString() : v),
+                                        2
+                                      )
+                                    : JSON.stringify({ kind: "unknown", reason: op.decoded.reason }, null, 2)
+                                  : "null"}
+                              </pre>
+                            </div>
+
+                            <div className="text-xs">
+                              <div className="font-semibold mb-1">raw calldata</div>
+                              <pre className="text-xs whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--panel)] p-3 break-all">
+                                {op.data}
+                              </pre>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
