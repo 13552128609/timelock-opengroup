@@ -67,6 +67,17 @@ function normalizeDateTimeString(input: string): string {
   return `${y}/${mo}/${d}${sep}${hh}:${mm}:${ss}`;
 }
 
+function formatUtcSeconds(ts: bigint): string {
+  const d = new Date(Number(ts) * 1000);
+  const y = d.getUTCFullYear();
+  const mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  const ss = String(d.getUTCSeconds()).padStart(2, "0");
+  return `${y}/${mo}/${day}-${hh}:${mm}:${ss}`;
+}
+
 function tokenizeCommandLine(input: string): string[] {
   const out: string[] = [];
   let cur = "";
@@ -154,6 +165,13 @@ const smgAbi = [
     ],
     outputs: [],
   },
+  {
+    type: "function",
+    name: "select",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "groupId", type: "bytes32" }],
+    outputs: [],
+  },
 ] as const;
 
 const gpkAbi = [
@@ -224,6 +242,7 @@ export default function BatchBuilderPage() {
 
   const [regEnd, setRegEnd] = useState(DEFAULT_REG_END);
   const [openGroupTime, setOpenGroupTime] = useState(DEFAULT_OPEN_GROUP_TIME);
+  const [selectTime, setSelectTime] = useState("");
   const [gpkEnd, setGpkEnd] = useState(DEFAULT_GPK_END);
   const [wkStart, setWkStart] = useState(DEFAULT_WK_START);
   const [wkEnd, setWkEnd] = useState(DEFAULT_WK_END);
@@ -266,6 +285,15 @@ export default function BatchBuilderPage() {
       setGrpPrex(selectedGrpPrex.trim());
     }
   }, [selectedGrpPrex]);
+
+  useEffect(() => {
+    try {
+      const next = toUnixSeconds(regEnd) + BigInt(30);
+      setSelectTime(formatUtcSeconds(next));
+    } catch {
+      setSelectTime("");
+    }
+  }, [regEnd]);
 
   const [memberCountDesign, setMemberCountDesign] = useState("");
   const [threshold, setThreshold] = useState("");
@@ -418,6 +446,7 @@ export default function BatchBuilderPage() {
 
     let regEndTs: bigint = BigInt(0);
     let openGroupTs: bigint = BigInt(0);
+    let selectTs: bigint = BigInt(0);
     let gpkEndTs: bigint = BigInt(0);
     let wkStartTs: bigint = BigInt(0);
     let wkEndTs: bigint = BigInt(0);
@@ -425,6 +454,7 @@ export default function BatchBuilderPage() {
     try {
       regEndTs = toUnixSeconds(regEnd);
       openGroupTs = toUnixSeconds(openGroupTime);
+      selectTs = toUnixSeconds(selectTime);
       gpkEndTs = toUnixSeconds(gpkEnd);
       wkStartTs = toUnixSeconds(wkStart);
       wkEndTs = toUnixSeconds(wkEnd);
@@ -434,6 +464,7 @@ export default function BatchBuilderPage() {
 
     regEndTs = ensureUint256(regEndTs, "regEnd");
     openGroupTs = ensureUint256(openGroupTs, "openGroupTime");
+    selectTs = ensureUint256(selectTs, "selectTime");
     gpkEndTs = ensureUint256(gpkEndTs, "gpkEnd");
     wkStartTs = ensureUint256(wkStartTs, "wkStart");
     wkEndTs = ensureUint256(wkEndTs, "wkEnd");
@@ -451,9 +482,13 @@ export default function BatchBuilderPage() {
 
     const nowTs = BigInt(Math.floor(Date.now() / 1000));
     const computedDelay = openGroupTs > nowTs ? openGroupTs - nowTs : BigInt(0);
+    const selectDelay = selectTs > nowTs ? selectTs - nowTs : BigInt(0);
 
     if (errors.length === 0 && computedDelay <= BigInt(0)) {
       errors.push("Constraint violated: delay must be > 0 (openGroupTime must be in the future)");
+    }
+    if (errors.length === 0 && selectDelay <= BigInt(0)) {
+      errors.push("Constraint violated: select delay must be > 0 (selectTime must be in the future)");
     }
 
     const wkList = wkAddrs.trim() === "0x" ? [] : parseLines(wkAddrs);
@@ -468,12 +503,14 @@ export default function BatchBuilderPage() {
         preGroupIdBytes32,
         regEndTs: regEndTs.toString(),
         openGroupTs: openGroupTs.toString(),
+        selectTs: selectTs.toString(),
         gpkEndTs: gpkEndTs.toString(),
         wkStartTs: wkStartTs.toString(),
         wkEndTs: wkEndTs.toString(),
         registerDuration: "0",
         totalTime: "0",
         delay: "0",
+        selectDelay: "0",
         wkCount: wkList.length,
         senderCount: senderList.length,
       };
@@ -482,6 +519,8 @@ export default function BatchBuilderPage() {
         errors,
         summary,
         delay: BigInt(0),
+        selectDelay: BigInt(0),
+        selectPayload: "0x" as `0x${string}`,
         targets: [] as `0x${string}`[],
         values: [] as bigint[],
         payloads: [] as `0x${string}`[],
@@ -509,12 +548,19 @@ export default function BatchBuilderPage() {
     let smgPayload: `0x${string}` = "0x";
     let setPeriodPayload: `0x${string}` = "0x";
     let setGpkCfgPayload: `0x${string}` = "0x";
+    let selectPayload: `0x${string}` = "0x";
 
     try {
       smgPayload = encodeFunctionData({
         abi: smgAbi,
         functionName: "storemanGroupRegisterStart",
         args: [smgArgs as any, wkList as any, senderList as any],
+      });
+
+      selectPayload = encodeFunctionData({
+        abi: smgAbi,
+        functionName: "select",
+        args: [groupIdBytes32],
       });
 
       setPeriodPayload = encodeFunctionData({
@@ -546,12 +592,14 @@ export default function BatchBuilderPage() {
         preGroupIdBytes32,
         regEndTs: regEndTs.toString(),
         openGroupTs: openGroupTs.toString(),
+        selectTs: selectTs.toString(),
         gpkEndTs: gpkEndTs.toString(),
         wkStartTs: wkStartTs.toString(),
         wkEndTs: wkEndTs.toString(),
         registerDuration: "0",
         totalTime: "0",
         delay: "0",
+        selectDelay: "0",
         wkCount: wkList.length,
         senderCount: senderList.length,
       };
@@ -560,6 +608,8 @@ export default function BatchBuilderPage() {
         errors,
         summary,
         delay: BigInt(0),
+        selectDelay: BigInt(0),
+        selectPayload: "0x" as `0x${string}`,
         targets: [] as `0x${string}`[],
         values: [] as bigint[],
         payloads: [] as `0x${string}`[],
@@ -578,12 +628,14 @@ export default function BatchBuilderPage() {
       preGroupIdBytes32,
       regEndTs: regEndTs.toString(),
       openGroupTs: openGroupTs.toString(),
+      selectTs: selectTs.toString(),
       gpkEndTs: gpkEndTs.toString(),
       wkStartTs: wkStartTs.toString(),
       wkEndTs: wkEndTs.toString(),
       registerDuration: registerDuration.toString(),
       totalTime: totalTime.toString(),
       delay: computedDelay.toString(),
+      selectDelay: selectDelay.toString(),
       wkCount: wkList.length,
       senderCount: senderList.length,
     };
@@ -595,6 +647,8 @@ export default function BatchBuilderPage() {
         errors,
         summary,
         delay: BigInt(0),
+        selectDelay: BigInt(0),
+        selectPayload: "0x" as `0x${string}`,
         targets: [] as `0x${string}`[],
         values: [] as bigint[],
         payloads: [] as `0x${string}`[],
@@ -607,6 +661,8 @@ export default function BatchBuilderPage() {
       errors,
       summary,
       delay: computedDelay,
+      selectDelay,
+      selectPayload,
       targets,
       values,
       payloads,
@@ -617,6 +673,7 @@ export default function BatchBuilderPage() {
     pgid,
     regEnd,
     openGroupTime,
+    selectTime,
     gpkEnd,
     wkStart,
     wkEnd,
@@ -700,6 +757,8 @@ export default function BatchBuilderPage() {
                     onClick={async () => {
                       if (!timelockAddr) throw new Error("Missing timelockAddr");
                       if (!isHexAddress(timelockAddr)) throw new Error("Invalid timelockAddr");
+                      if (!smgContractAddr) throw new Error("Missing smgContractAddr");
+                      if (!isHexAddress(smgContractAddr)) throw new Error("Invalid smgContractAddr");
                       await sendTx(
                         () =>
                           writeContractAsync({
@@ -716,6 +775,23 @@ export default function BatchBuilderPage() {
                             ],
                           }),
                         "Schedule batch"
+                      );
+                      await sendTx(
+                        () =>
+                          writeContractAsync({
+                            address: timelockAddr,
+                            abi: timelockAbi,
+                            functionName: "schedule",
+                            args: [
+                              smgContractAddr,
+                              BigInt(0),
+                              parsed.selectPayload,
+                              predecessor as `0x${string}`,
+                              salt as `0x${string}`,
+                              parsed.selectDelay,
+                            ],
+                          }),
+                        "Schedule SMG.select"
                       );
                     }}
                   >
@@ -740,6 +816,22 @@ export default function BatchBuilderPage() {
                   <div>
                     <Label>delay (seconds)</Label>
                     <Input value={parsed.delay.toString()} disabled />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>selectTime (YYYY/MM/DD-HH:mm:ss, UTC)</Label>
+                    <Input
+                      value={selectTime}
+                      onChange={(e) => setSelectTime(e.target.value)}
+                      onBlur={() => setSelectTime((v) => normalizeDateTimeString(v))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>select delay (seconds)</Label>
+                    <Input value={parsed.selectDelay.toString()} disabled />
                   </div>
                 </div>
 

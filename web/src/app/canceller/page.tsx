@@ -43,6 +43,13 @@ const smgAbi = [
     ],
     outputs: [],
   },
+  {
+    type: "function",
+    name: "select",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "groupId", type: "bytes32" }],
+    outputs: [],
+  },
 ] as const;
 
 const gpkAbi = [
@@ -202,12 +209,24 @@ export default function CancellerPage() {
     try {
       if (smgContractAddr && target.toLowerCase() === smgContractAddr.toLowerCase()) {
         const decoded = decodeFunctionData({ abi: smgAbi, data });
+        const args = decoded.args ?? [];
+        const named: Record<string, unknown> = {};
+        if (decoded.functionName === "storemanGroupRegisterStart") {
+          Object.assign(
+            named,
+            args?.[0] && typeof args?.[0] === "object"
+              ? ({ ...(args?.[0] as any), wkAddrs: args?.[1], senders: args?.[2] } as any)
+              : { args }
+          );
+        } else if (decoded.functionName === "select") {
+          named.groupId = args[0];
+        } else {
+          named.args = args;
+        }
         return {
           kind: "decoded",
           functionName: decoded.functionName,
-          args: (decoded.args?.[0] && typeof decoded.args?.[0] === "object")
-            ? ({ ...(decoded.args?.[0] as any), wkAddrs: decoded.args?.[1], senders: decoded.args?.[2] } as any)
-            : ({ args: decoded.args } as any),
+          args: named,
         };
       }
 
