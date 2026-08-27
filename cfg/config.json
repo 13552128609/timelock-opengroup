@@ -124,6 +124,7 @@
     "gpkContractAddr": "0xFC86Ad558163C4933eBCfA217945aF6e9a3bcE06",
     "smgContractAddr": "0x1E7450D5d17338a348C5438546f0b4D0A5fbeaB6",
     "timelockAddr": "0xeD033FE929d650E642AF9eEc685BD84a57eBb4fb",
+    "stakerContractAddr": "0x54cf2ee5B061e3964C60BB7514674aA5F90A08C2",
     "groups": {
       "Aries": {
         "cron": "0 4 * * *",

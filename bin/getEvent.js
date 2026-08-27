@@ -15,6 +15,7 @@ function parseArgs(argv) {
     grpPrex: "",
     beforeBlock: 518400,
     scAddr: "",
+    indexFilters: [],
     positional: [],
   };
 
@@ -46,6 +47,11 @@ function parseArgs(argv) {
       i++;
       continue;
     }
+    if (a === "--index") {
+      out.indexFilters.push({ key: argv[i + 1] || "", value: argv[i + 2] || "" });
+      i += 2;
+      continue;
+    }
     out.positional.push(a);
   }
   return out;
@@ -74,13 +80,14 @@ function buildNetworkRuntime(network, grpPrex) {
   if (!net.timelockAddr) {
     throw new Error(`Missing ${network}.timelockAddr in cfg/config.json`);
   }  
-
   return {
     rpcUrl: net.url,
     contractAddress: {
       SMG: net.smgContractAddr,
       GPK: net.gpkContractAddr,
       TIMELOCK: net.timelockAddr,
+      STAKER: net.stakerAddr || net.stakerContractAddr || "",
+      NON: net.nonAddr || net.nonContractAddr || "",
     },
   };
 }
@@ -89,6 +96,8 @@ const ABI = {
   "SMG": require("./abi/smg-abi.json"),
   "GPK": require("./abi/gpk-abi.json"),
   "TIMELOCK": require("./abi/timelock-abi.json"),
+  "STAKER": require("./abi/staker-abi.json"),
+  "NON": require("./abi/non-abi.json"),
 }
 
 function jsonReplacer(_key, value) {
@@ -107,6 +116,44 @@ function normalizeArgs(args) {
     out[key] = args[key];
   }
   return out;
+}
+
+function normalizeIndexValue(value, type) {
+  if (/^u?int/.test(type)) {
+    return BigInt(value);
+  }
+  if (type === "bool") {
+    return String(value).toLowerCase() === "true" || value === "1";
+  }
+  return value;
+}
+
+function buildEventFilter(contract, contractAddress, eventName, indexFilters) {
+  if (!indexFilters.length) {
+    return eventName;
+  }
+
+  const fragment = contract.interface.getEvent(eventName);
+  const values = new Array(fragment.inputs.length).fill(null);
+  for (const item of indexFilters) {
+    const numericIndex = Number(item.key);
+    const inputIndex = Number.isInteger(numericIndex)
+      ? numericIndex
+      : fragment.inputs.findIndex((input) => input.name === item.key);
+    const input = fragment.inputs[inputIndex];
+    if (!input) {
+      throw new Error(`Invalid --index key: ${item.key}`);
+    }
+    if (!input.indexed) {
+      throw new Error(`Event parameter is not indexed: ${item.key}`);
+    }
+    values[inputIndex] = normalizeIndexValue(item.value, input.type);
+  }
+
+  return {
+    address: contractAddress,
+    topics: contract.interface.encodeFilterTopics(fragment, values),
+  };
 }
 
 function formatArgsWithNames(event) {
@@ -147,7 +194,7 @@ function formatArgsWithNames(event) {
 
 function printUsageAndExit() {
   console.log(
-    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] [--scAddr 0x...] <gpk|smg|timelock> <eventName>"
+    "Usage: node bin/getEvent.js [--network testnet|mainnet (default mainnet)] [--beforeBlock N (default 518400)] [--scAddr 0x...] [--index <name|index> <value>] <gpk|smg|timelock|staker|non> <eventName>"
   );
   console.log(
     "Example: node bin/getEvent.js --network testnet --beforeBlock 10000 smg StoremanGroupRegisterStartEvent"
@@ -159,7 +206,7 @@ function printUsageAndExit() {
 }
 
 async function main() {
-  const { network, grpPrex, beforeBlock, scAddr, positional } = parseArgs(process.argv.slice(2));
+  const { network, grpPrex, beforeBlock, scAddr, indexFilters, positional } = parseArgs(process.argv.slice(2));
   const rawContractInput = positional[0];
   const contractArg = (positional[0] || "").toUpperCase();
   const eventName = positional[1];
@@ -184,14 +231,14 @@ async function main() {
   const RPC_URL = runtime.rpcUrl;
   const CONTRACT_ADDRESS = runtime.contractAddress;
 
-  if (!CONTRACT_ADDRESS[contractArg]) {
-    console.error("Unknown contract:", rawContractInput);
-    printUsageAndExit();
-  }
-
   if (!ABI[contractArg]) {
     console.error("ABI not found for contract:", rawContractInput);
     process.exit(1);
+  }
+
+  if (!CONTRACT_ADDRESS[contractArg] && (!scAddr || scAddr.trim() === "")) {
+    console.error("Missing contract address:", rawContractInput);
+    printUsageAndExit();
   }
 
   // 连接到以太坊网络
@@ -209,6 +256,9 @@ async function main() {
   console.log("正在连接合约，准备获取事件数据...");
   console.log("contract:", contractArg, contractAddress);
   console.log("eventName:", eventName);
+  if (indexFilters.length) {
+    console.log("indexFilters:", indexFilters);
+  }
 
   // --- 场景 A: 获取历史事件 ---
   async function getPastEvents() {
@@ -220,7 +270,22 @@ async function main() {
     const fromBlock = Math.max(0, currentBlock - beforeBlock);
     const toBlock = currentBlock;
     console.log(`fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
-    const events = await contract.queryFilter(eventName, fromBlock, toBlock);
+    const eventFilter = buildEventFilter(contract, contractAddress, eventName, indexFilters);
+    let events;
+    if (indexFilters.length) {
+      const logs = await provider.getLogs({
+        ...eventFilter,
+        fromBlock,
+        toBlock,
+      });
+      events = logs.map((log) => ({
+        ...contract.interface.parseLog(log),
+        blockNumber: log.blockNumber,
+        transactionHash: log.transactionHash,
+      }));
+    } else {
+      events = await contract.queryFilter(eventFilter, fromBlock, toBlock);
+    }
     console.log(`events.length: ${events.length}`);
     
     events.forEach((event) => {
